@@ -3,7 +3,7 @@
 .RData
 .Ruserdata
 *.Rproj
-data/
+data/no_repo/
 R/hpc/
 results/
 stat_results/

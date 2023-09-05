@@ -1,18 +1,13 @@
-library(glue)
-library(dplyr)
-library(ggplot2)
-library(tidyverse)
-library(viridis)
+libs_load <- c("mlscluster","glue","dplyr", "ggplot2","tidyverse", "viridis")
+invisible( lapply(libs_load, library, character.only=TRUE) )
 
 # Plot distribution of sequences included (fig. 2)
-sc2_md_curated2 <- readRDS("rds/sc2_md_curated.rds")
-sc2_md_curated2 <- include_major_lineage_column(sc2_md_curated2)
-sc2_md_curated2$major_lineage <- ifelse(grepl("\\bOmicron_BA\\.\\*\\b", sc2_md_curated2$major_lineage), "Other", as.character(sc2_md_curated2$major_lineage))
-#sc2_tre_curated2 <- readRDS("rds/sc2_tre_curated.rds")
+sc2_md_curated <- readRDS(system.file("extdata", "sc2_md_curated.rds", package="mlscluster"))
 
 # Palette for major_lineages
-pal_lineages <- c("Alpha_B.1.1.7"="#fd7f6f", "Delta_AY.4.*"="#7eb0d5", "Delta_other"="#b2e061", "EU1_B.1.177"="#bd7ebe", "Omicron_BA.1.*"="#ffb55a", "Omicron_BA.2.*"="#ffee65", "Other"="#fdcce5") #removed "#beb9db", "#8bd3c7"
+pal_lineages <- c("Alpha_B.1.1.7"="#fd7f6f", "Delta_AY.4.*"="#7eb0d5", "Delta_other"="#b2e061", "EU1_B.1.177"="#bd7ebe", "Omicron_BA.1.*"="#ffb55a", "Omicron_BA.2.*"="#ffcc00", "Other"="#fdcce5")
 
+sc2_md_curated2 <- sc2_md_curated
 sc2_md_curated2$month <-as.Date(cut(sc2_md_curated2$sample_date, breaks = "1 month"))
 
 df_lineages_per_month <- sc2_md_curated2 %>% group_by(month, major_lineage) %>% summarise(count_lin_month=n())
@@ -39,22 +34,15 @@ sc2_md_curated2 <- sc2_md_curated2[sc2_md_curated2$region != "",] # 20885 where 
 sort(unique(sc2_md_curated2$region)) #285 unique regions
 
 sc2_md_curated2$region <- gsub("_", " ", sc2_md_curated2$region)
-#sc2_md_curated2 <- sc2_md_curated2[sc2_md_curated2$region != "LONDON",] # 1 obs
-#sc2_md_curated2 <- sc2_md_curated2[sc2_md_curated2$region != "HILLINGDON",] # 3 obs
-# sc2_md_curated2 <- sc2_md_curated2[ sc2_md_curated2$region=="LONDON" ] <- "INNER LONDON"
-# sc2_md_curated2 <- sc2_md_curated2[ sc2_md_curated2$region== "HILLINGDON" ] <- "OUTER LONDON"
 sort(unique(sc2_md_curated2$region)) #265 unique regions
 
-#lookup_ltla_utla_england <- read.csv("data/ltla_to_utla_lookup_england.csv", header=T) 
 lookup_ltla_utla_adm2 <- read.csv("data/LAD_UTLA_adm2.csv", header=T) 
 lookup_ltla_utla_adm2$adm2 <- gsub("_", " ", lookup_ltla_utla_adm2$adm2)
 lookup_ltla_utla_adm2 <- lookup_ltla_utla_adm2[grepl("E", lookup_ltla_utla_adm2$UTLA_code),] # keep only England
 sort(unique(lookup_ltla_utla_adm2$LAD_code)) #317 unique LTLAs
 
 library(sp)
-library(maptools)
 library(raster)
-#library(leaflet) #install.packages("leaflet")
 library(broom)
 
 shp <- getData('GADM', country='GBR', level = 2, path="data/") 
@@ -70,36 +58,24 @@ rm(shp, shp_england)
 #print(length(unique(shp_england$id)) == length(unique(lookup_ltla_utla_england$LTLA22CD)))
 
 sc2_md_curated3 <- sc2_md_curated2
-#sc2_md_curated3$region[sc2_md_curated3$region == "GREATER MANCHESTER"] <- "MANCHESTER"
 sc2_md_curated3$region[sc2_md_curated3$region == "COUNTY DURHAM"] <- "DURHAM"
 sc2_md_curated3$region[sc2_md_curated3$region == "BERKSHIRE"] <- "WEST BERKSHIRE"
 # extract matches between COG md region and adm2
 sc2_md_curated3_test <- sc2_md_curated3 %>% inner_join(lookup_ltla_utla_adm2, by=c("region"="adm2"), multiple="first")
 unique(sc2_md_curated3_test$region) #118 unique regions
-#sc2_md_curated2_test$adm2 <- sc2_md_curated2_test$region
 sc2_md_curated3_test <- sc2_md_curated3_test %>% dplyr::select(sequence_name, sample_date, lineage, major_lineage, region, mutations, month)
 # extract NON-matches between COG md region and adm2
 sc2_md_curated3_test_not <- sc2_md_curated3 %>% anti_join(lookup_ltla_utla_adm2, by=c("region"="adm2")) #multiple="first
 sc2_md_curated3_test_not_c <- sc2_md_curated3_test_not %>% group_by(region) %>% summarise(n=n())
-#sc2_md_curated2_test_not$region <- ifelse(sc2_md_curated2_test_not$region %in% lookup_ltla_utla_adm2$LAD_name, yes=, no=)
-#%>% inner_join(lookup_ltla_utla_adm2, by=c("region"="LAD_name"), multiple="first")
 # Extract other matches with LTLAs (commenting because this inflates DURHAM)
 sc2_md_curated3_test_match_ltla <- sc2_md_curated3_test_not %>% inner_join(lookup_ltla_utla_adm2, by=c("region"="LAD_name"), multiple="first")
 sc2_md_curated3_test_match_ltla$region <- sc2_md_curated3_test_match_ltla$adm2
 unique(sc2_md_curated3_test_match_ltla$region)
 sc2_md_curated3_test_match_ltla <- sc2_md_curated3_test_match_ltla %>% dplyr::select(sequence_name, sample_date, lineage, major_lineage, region, mutations, month)
 sc2_md_curated3_test_match_ltla_c <- sc2_md_curated3_test_match_ltla %>% group_by(region) %>% summarise(n=n())
-# Extract other matches with UTLAs
-#sc2_md_curated2_test_match_utla <- sc2_md_curated2_test_not %>% inner_join(lookup_ltla_utla_adm2, by=c("region"="UTLA_name"), multiple="first")
-#sc2_md_curated2_test_match_utla$region <- sc2_md_curated2_test_match_utla$adm2
-#unique(sc2_md_curated2_test_match_utla$region)
-#sc2_md_curated2_test_match_utla <- sc2_md_curated2_test_match_utla %>% dplyr::select(sequence_name, sample_date, lineage, major_lineage, region, mutations, month)
-#sc2_md_curated3_all <- rbind(sc2_md_curated3_test, sc2_md_curated3_test_match_ltla) #sc2_md_curated2_test_match_utla
+
 sc2_md_curated3_all <- sc2_md_curated3_test
 sc2_md_curated3_all <- sc2_md_curated3_all[!duplicated(sc2_md_curated3_all$sequence_name), ]
-#length(unique(sc2_md_curated2_all$region)) #119 (LIVERPOOL included here but not in GADM, ok since only 1639 obs)
-#length(unique(shp_england$NAME_2))
-#nrow(sc2_md_curated2) - nrow(sc2_md_curated2_all) #44513 without regions after matches + 20885 blank = 65398
 
 london_ltla_to_adm2 <- lookup_ltla_utla_adm2$LAD_name[lookup_ltla_utla_adm2$adm2 == "GREATER LONDON"]
 
@@ -120,8 +96,6 @@ calculate_cases_england_regions <- function(file, period=5) {
 	print(length(unique(cases_region$areaName))) #380 areaNames
 	cases_region$month <- as.Date(cut(as.Date(cases_region$date), breaks = "1 month"))
 	
-	#cases_region <- cases_region %>% filter(between(month, as.Date('2020-06-01'), as.Date('2022-04-01'))) %>% group_by(areaName) %>% summarise(cases=sum(newCasesBySpecimenDate))
-	
 	if(period==1) { #June-Dec 2020 / Other+EU1
 		cases_region <- cases_region %>% filter(between(month, as.Date('2020-06-01'), as.Date('2020-12-01'))) %>% group_by(areaName) %>% summarise(cases=sum(newCasesBySpecimenDate))
 	}else if(period==2) { #Jan-May 2021 / Alpha
@@ -134,12 +108,11 @@ calculate_cases_england_regions <- function(file, period=5) {
 		cases_region <- cases_region %>% filter(between(month, as.Date('2020-06-01'), as.Date('2022-04-01'))) %>% group_by(areaName) %>% summarise(cases=sum(newCasesBySpecimenDate))
 	}
 	
-	# TODO solve dilema "POOLE" & "BOURNEMOUTH" & "CORNWALL" + "ISLES OF SCILLY" (duplicate rows)
+	# Solution for ambiguity at "POOLE" + "BOURNEMOUTH" & "CORNWALL" + "ISLES OF SCILLY" (duplicate)
 	
 	# Duplicate column
 	cases_region <- cases_region %>% filter(areaName == "BOURNEMOUTH, CHRISTCHURCH AND POOLE") %>% bind_rows(cases_region, .) 
 	# Change each to a different adm2 region (e.g. BOURNEMOUTH, CHRISTCHURCH AND POOLE -> 1. BOURNEMOUTH -> 2. POOLE)
-	#cases_region %>% group_by(areaName) %>% filter(row_number()==1) %>% mutate(areaName=replace(areaName, "BOURNEMOUTH, CHRISTCHURCH AND POOLE", "BOURNEMOUTH"))
 	cases_region <- cases_region %>% group_by(areaName) %>% mutate(areaName = ifelse(row_number() == 2, "POOLE", as.character(areaName)))
 	cases_region[ cases_region == "BOURNEMOUTH, CHRISTCHURCH AND POOLE" ] <- "BOURNEMOUTH"
 	cases_region <- cases_region %>% filter(areaName == "CORNWALL AND ISLES OF SCILLY") %>% bind_rows(cases_region, .)

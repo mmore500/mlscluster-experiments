@@ -1,20 +1,16 @@
-## 1. Clustering algorithm run ##
-sc2_md_curated <- readRDS("rds/sc2_md_curated.rds")
-sc2_tre_curated <- readRDS("rds/sc2_tre_curated.rds")
+libs_load <- c("mlscluster","glue", "ggplot2","ggpubr")
+invisible( lapply(libs_load, library, character.only=TRUE) )
 
-source("R/utils.R")
-source("R/mlsclust.R")
-source("R/consts.R")
-source("R/multiple_thresholds.R")
-source("R/fdr.R")
-source("R/selected_threshold.R")
+# Load metadata and tree
+sc2_md_curated <- readRDS(system.file("extdata", "sc2_md_curated.rds", package="mlscluster"))
+sc2_tre_curated <- readRDS(system.file("extdata", "sc2_tre_curated.rds", package="mlscluster"))
 
 NCPU <- 4
 options(scipen=999)
 
-###Testing only
 #options(max.print=999999)
 
+## 1. Run mlsclust ##
 # Period 1: testing (~10 minutes: 6 for mlscluster and 4 for run_diff_thresholds)
 start <- Sys.time()
 res_p1 <- mlsclust(sc2_tre_curated, sc2_md_curated, min_descendants=10, max_descendants=20e3, min_cluster_age_yrs=1/12, 
@@ -23,15 +19,15 @@ res_p1 <- mlsclust(sc2_tre_curated, sc2_md_curated, min_descendants=10, max_desc
 end <- Sys.time()
 total_time_p1 <- as.numeric (end - start, units = "mins")
 message(paste("Total time elapsed:",total_time_p1,"mins"))
-saveRDS(res_p1, "rds/res_p1_detailedF.rds")
 
-start <- Sys.time()
 thr <- c(0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 10, 25)
 quantl <- c(1/400, 1/200, 1/400, 1/100, 2/100, 3/100, 4/100, 5/100, 1/10, 1/4)
+
+start <- Sys.time()
 start <- Sys.time()
 for(i in 1:length(thr)) {
 	run_diff_thresholds(stats_df_unfilt=res_p1[[1]], tgt_nodes=res_p1[[2]], homoplasies=res_p1[[3]], 
-																					output_dir=glue("results/TEST_detailedF_01_sc2_root_to_dec2020/threshold_quantile_{thr[[i]]}/"), 
+																					output_dir=glue("results/01_sc2_root_to_dec2020/threshold_quantile_{thr[[i]]}/"), 
 																					quantile_choice=quantl[i], quantile_threshold_ratio_sizes=thr[i], quantile_threshold_ratio_persist_time=thr[i], 
 																					quantile_threshold_logit_growth=thr[i], threshold_keep_lower=TRUE, compute_tree_annots=FALSE, plot_global_mut_freq=FALSE, 
 																					detailed_output=FALSE) #, desc_sisters=list(res_p1[[4]], res_p1[[5]]), amd=res_p1[[6]]
@@ -40,20 +36,22 @@ end <- Sys.time()
 total_time_p1_t <- as.numeric (end - start, units = "mins")
 message(paste("Total time elapsed:",total_time_p1_t,"mins"))
 
-# Period 2: june 2020 to mid-November 2021 -> testing ()
-start <- Sys.time()
-res_p2 <- mlsclust(sc2_tre_curated, sc2_md_curated, min_descendants=10, max_descendants=20e3, min_cluster_age_yrs=1/12, 
-																			min_date=as.Date("2019-12-30"), max_date=as.Date("2021-11-15"), branch_length_unit="days", defining_mut_threshold=0.75, 
-																			root_on_tip="Wuhan/WH04/2020", root_on_tip_sample_time=2019.995, detailed_output=FALSE, ncpu=NCPU)
-end <- Sys.time()
-total_time_p2 <- as.numeric (end - start, units = "mins")
-message(paste("Total time elapsed:",total_time_p2,"mins"))
-saveRDS(res_p2, "rds/res_p2.rds")
+# IMPORTANT: this part is commented because it is time-consuming (see README.md and run in a server if you want to get `res_p2` by yourself)
+# Period 2: june 2020 to mid-November 2021
+# start <- Sys.time()
+# res_p2 <- mlsclust(sc2_tre_curated, sc2_md_curated, min_descendants=10, max_descendants=20e3, min_cluster_age_yrs=1/12, 
+# 																			min_date=as.Date("2019-12-30"), max_date=as.Date("2021-11-15"), branch_length_unit="days", defining_mut_threshold=0.75, 
+# 																			root_on_tip="Wuhan/WH04/2020", root_on_tip_sample_time=2019.995, detailed_output=FALSE, ncpu=NCPU)
+# end <- Sys.time()
+# total_time_p2 <- as.numeric (end - start, units = "mins")
+# message(paste("Total time elapsed:",total_time_p2,"mins")) # ~10 hours
+#saveRDS(res_p2, "rds/res_p2.rds")
+res_p2 <- readRDS(system.file("extdata", "res_p2.rds", package="mlscluster"))
 
 start <- Sys.time()
 for(i in 1:length(thr)) {
 	run_diff_thresholds(stats_df_unfilt=res_p2[[1]], tgt_nodes=res_p2[[2]], homoplasies=res_p2[[3]], 
-																					output_dir=glue("results/TEST_02_sc2_root_to_nov2021/threshold_quantile_{thr[[i]]}/"), 
+																					output_dir=glue("results/02_sc2_root_to_nov2021/threshold_quantile_{thr[[i]]}/"), 
 																					quantile_choice=quantl[i], quantile_threshold_ratio_sizes=thr[i], quantile_threshold_ratio_persist_time=thr[i], 
 																					quantile_threshold_logit_growth=thr[i], threshold_keep_lower=TRUE, compute_tree_annots=FALSE, plot_global_mut_freq=FALSE, 
 																					detailed_output=FALSE) #desc_sisters=list(res_p2[[4]], res_p2[[5]]), amd=res_p2[[6]]
@@ -62,21 +60,27 @@ end <- Sys.time()
 total_time_p2_t <- as.numeric (end - start, units = "mins")
 message(paste("Total time elapsed:",total_time_p2_t,"mins"))
 
-# Period 3: june 2020 to april 2022 -> testing ()
-start <- Sys.time()
-res_p3 <- mlsclust(sc2_tre_curated, sc2_md_curated, min_descendants=10, max_descendants=20e3, min_cluster_age_yrs=1/12, min_date=as.Date("2019-12-30"), max_date=as.Date("2022-04-30"), branch_length_unit="days", defining_mut_threshold=0.75, root_on_tip="Wuhan/WH04/2020", root_on_tip_sample_time=2019.995, detailed_output=FALSE, ncpu=NCPU)
-end <- Sys.time()
-total_time_p3 <- as.numeric (end - start, units = "mins")
-message(paste("Total time elapsed:",total_time_p3,"mins"))
+# IMPORTANT: this part is commented because it is time-consuming (see README.md and run in a server if you want to get `res_p3` by yourself)
+# Period 3: june 2020 to april 2022
+# start <- Sys.time()
+# res_p3 <- mlsclust(sc2_tre_curated, sc2_md_curated, min_descendants=10, max_descendants=20e3, min_cluster_age_yrs=1/12, min_date=as.Date("2019-12-30"), max_date=as.Date("2022-04-30"), branch_length_unit="days", defining_mut_threshold=0.75, root_on_tip="Wuhan/WH04/2020", root_on_tip_sample_time=2019.995, detailed_output=FALSE, ncpu=NCPU)
+# end <- Sys.time()
+# total_time_p3 <- as.numeric (end - start, units = "mins")
+# message(paste("Total time elapsed:",total_time_p3,"mins")) # ~29 hours
+#saveRDS(res_p3, "rds/res_p3.rds")
+res_p3 <- readRDS(system.file("extdata", "res_p3.rds", package="mlscluster"))
 
 start <- Sys.time()
 for(i in 1:length(thr)) {
-	run_diff_thresholds(stats_df_unfilt=res_p3, output_dir=glue("results/TEST_03_sc2_whole_period/threshold_quantile_{thr[[i]]}/"), quantile_choice=quantl[i], quantile_threshold_ratio_sizes=thr[i], quantile_threshold_ratio_persist_time=thr[i], quantile_threshold_logit_growth=thr[i], threshold_keep_lower=TRUE, compute_tree_annots=FALSE, plot_global_mut_freq=FALSE, detailed_output=FALSE) #tgt_nodes=res_p3[[2]], homoplasies=res_p3[[3]], desc_sisters=list(res_p3[[4]], res_p3[[5]]), amd=res_p3[[6]]
+	run_diff_thresholds(stats_df_unfilt=res_p3[[1]], tgt_nodes=res_p3[[2]], homoplasies=res_p3[[3]], 
+																					output_dir=glue("results/03_sc2_whole_period/threshold_quantile_{thr[[i]]}/"), 
+																					quantile_choice=quantl[i], quantile_threshold_ratio_sizes=thr[i], quantile_threshold_ratio_persist_time=thr[i], 
+																					quantile_threshold_logit_growth=thr[i], threshold_keep_lower=TRUE, compute_tree_annots=FALSE, plot_global_mut_freq=FALSE, 
+																					detailed_output=FALSE) #desc_sisters=list(res_p3[[4]], res_p3[[5]]), amd=res_p3[[6]]
 }
 end <- Sys.time()
 total_time_p3_t <- as.numeric (end - start, units = "mins")
 message(paste("Total time elapsed:",total_time_p3_t,"mins"))
-## End clustering algorithm run (test with 2020 data only) ##
 
 ## 2. Run statistical tests for multiple thresholds ##
 print("=========")
@@ -141,13 +145,12 @@ for(i in major_lineages_supp_indices) {
 
 sngrt_r3 <- stacked_nsites_genomic_region_mult_thresholds("stat_results/period3/genomewide_plot_non-syn/")
 
-#saveRDS(sngrt_r3, "rds/sngrt_r3.rds")
 ## End run for multiple thresholds ##
 
 ## 3. Run FDR ##
 # Extracting mutations from the entire dataset of >1.2 million sequences from England
-cog_md_muts_p2 <- extract_muts_period(as.Date("2021-11-15"), "period2")
-cog_md_muts_p3 <- extract_muts_period(as.Date("2022-04-30"), "period3")
+cog_md_muts_p2 <- extract_muts_period("rds/sc2_md_curated.rds", as.Date("2021-11-15")) #, "period2"
+cog_md_muts_p3 <- extract_muts_period("rds/sc2_md_curated.rds", as.Date("2022-04-30")) #, "period3"
 
 # Computing codon positions of mutations
 muts_match_codons_p2 <- compute_muts_match_codons(cog_md_muts_p2[[1]], cog_md_muts_p2[[2]])
@@ -164,17 +167,20 @@ rem_labels <- function(ggplot_obj_list) {
 		if(!(i %in% seq(1,25,5))) {
 			ggplot_obj_list[[i]] <- ggplot_obj_list[[i]] + theme(axis.text.y=element_blank(), axis.title.y=element_blank())
 		}
+		ggplot_obj_list[[i]] <- ggplot_obj_list[[i]] + theme(axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+			labs(color="Error estimation")
 	}
 	ggplot_obj_list
 }
 
 fdr_plots_p2 <- rem_labels(fdr_plots_p2)
 ggarrange(plotlist=fdr_plots_p2, ncol=5, nrow=5, common.legend = T)
-ggsave(glue("stat_results/period2/fdr_codons/fdr_all_regions_p2.pdf"), width=10, height=10, dpi=600, bg="white")
+ggsave(glue("stat_results/period2/fdr_codons/fdr_all_regions_p2.png"), width=10, height=10, dpi=600, bg="white")
 
 fdr_plots_p3 <- rem_labels(fdr_plots_p3)
-ggarrange(plotlist=fdr_plots_p3, ncol=5, nrow=5, common.legend = T)
-ggsave(glue("stat_results/period3/fdr_codons/fdr_all_regions_p3.pdf"), width=10, height=10, dpi=600, bg="white")
+fdr_plots_p3_all <- ggarrange(plotlist=fdr_plots_p3, ncol=5, nrow=5, common.legend = T)
+annotate_figure(fdr_plots_p3_all, left = text_grob("FDR estimates (%)", rot = 90, vjust = 1, size=8), bottom = text_grob("Thresholds", size=8))
+ggsave(glue("stat_results/plots_paper/FigS2.png"), units="px", width=2200, height=2500, dpi=300, bg="white")
 ## End run FDR ##
 
 ## 4. Run for the selected threshold (2% since FDR ~10% and epsilon ~2.5%) ##
@@ -213,6 +219,7 @@ rm_titles_y <- theme(axis.title.y=element_blank())
 rm_axis_text_x <- theme(axis.text.x=element_blank())
 my_legend <- get_legend(r3[[2]][[1]])
 #ggarrange(legend_1, legend_2, legend_3, nrow=3)
+marg <- ggplot2::theme(plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm"))
 f3 <- ggarrange(r2[[2]][[1]] + rm_titles_all + rm_axis_text_x + marg, r2[[2]][[2]] + rm_titles_all + rm_axis_text_x + marg, r3[[2]][[1]] + rm_titles_y + marg, r3[[2]][[2]] + rm_titles_y + marg, align='h', nrow=2, ncol=2, labels=c('A', 'B','C','D'), legend.grob=my_legend, legend="right") #common.legend = T
 annotate_figure(f3, left = text_grob("Genomic region", rot = 90, vjust = 1, size=8))
 ggsave("stat_results/plots_paper/Fig3.eps", device=cairo_ps, units="px", width=2100, height=1850, dpi=300, bg="white")
@@ -223,8 +230,6 @@ ggsave("stat_results/plots_paper/Fig4.eps", device=cairo_ps, units="px", width=2
 
 # Figure 5: spike-wide frequency of TFP-homoplasies & number of identified sites for each genomic position stacked by threshold
 # sngrt_r3 variable from analysis_mult_thresholds.R
-sngrt_r3 <- readRDS("rds/sngrt_r3.rds")
 f5_configs <- theme(axis.title.x=element_text(size=8), axis.title.y=element_text(size=8), axis.text.y=element_text(size=6, color="black"), axis.text.x=element_text(size=7, color="black"))
 ggarrange(r3[[3]] + f5_configs, sngrt_r3 + f5_configs, nrow=2, ncol=1, labels=c('A', 'B'), legend="right") #common.legend = T
 ggsave("stat_results/plots_paper/Fig5.eps", units="px", device=cairo_ps, width=2000, height=1750, dpi=300, bg="white")
-## End run for the selected threshold ##
