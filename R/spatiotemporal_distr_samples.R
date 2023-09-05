@@ -188,10 +188,6 @@ plot_map_periods <- function(period=5, label="Jun 2020 to Apr 2022", matches_cas
 	counts_seqs_shp$n_seqs[ is.na(counts_seqs_shp$n_seqs) ] <- 0
 	
 	system("mkdir -p stat_results/plots_paper/england_maps/")
-	#min_n <- 1 #min(counts_seqs_shp$prop)
-	#max_n <- #max(counts_seqs_shp$prop)
-	#n_breaks <- 7
-	#break_every <- round((max(counts_seqs_shp$n_seqs)-min(counts_seqs_shp$n_seqs))/n_breaks, -3) # round to exact thousands
 	print(glue("Period {period}"))
 	print(mean(counts_seqs_shp$prop, na.rm=T))
 	print(median(counts_seqs_shp$prop, na.rm=T))
@@ -200,7 +196,6 @@ plot_map_periods <- function(period=5, label="Jun 2020 to Apr 2022", matches_cas
 	p <- ggplot(data = counts_seqs_shp, aes(x = long, y = lat, group = group, fill = prop)) + ggtitle(glue("{label} ({nrow(counts_seqs_all_map)} adm2 regions)")) +
 		geom_polygon(color="grey20", linewidth=0.1) + coord_equal() + theme_void() + theme(legend.position=c(0.15,0.45),plot.title = element_text(hjust = 0.5, size=9),legend.text=element_text(size=6), legend.title=element_text(size=7)) + #0.2,0.6
 		scale_fill_continuous(type = "viridis", direction=-1, name="Proportion of cases\nsequenced (%)", trans = trim_tails(range = c(0,25)))#, breaks=seq(from=0, to=max_n, by=break_every), limits=c(0,max_n)) #na.value="white",
-	#ggsave(glue("stat_results/plots_paper/england_maps/period_{period}.png"), plot=p, width=5, height=6.5, dpi=600) #bg="white"
 	return(p)
 }
 
@@ -218,5 +213,4 @@ ggsave("stat_results/plots_paper/england_maps/map_complete_period.eps", plot=plo
 
 pl2 <- plot_maps_list[[5]]
 pl1 + annotation_custom(ggplotGrob(pl2), ymin=60000, ymax=150000, xmin=as.Date("2020-07-01"), xmax=as.Date("2021-06-01"))#, xmin = 1, xmax = 3, ymin = -0.3, ymax = 0.6)
-#ggarrange(pl1, pl2, ncol=2, nrow=1, labels=c("A","B"), align="h", widths=c(0.7,0.3))
 ggsave("stat_results/plots_paper/Fig2.eps", device=cairo_ps, units="px", width=2000, height=1750, dpi=300, bg="white")

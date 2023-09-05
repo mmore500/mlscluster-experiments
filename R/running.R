@@ -134,7 +134,6 @@ s1 <- plot_tbc_stats("results/03_sc2_whole_period",out_folder)
 ggsave("stat_results/plots_paper/FigS1.png", plot=s1, units="px", width=1500, height=2000, dpi=300, bg="white")
 
 # Figs S3-S8
-#major_lineages_supp_order <- c("Omicron_BA.1.*", "Delta_AY.4.*","Alpha_B.1.1.7","Delta_other","Other","Omicron_BA.2.*")
 major_lineages_supp_indices <- c(5,3,2,4,7,6)
 j <- 4
 for(i in major_lineages_supp_indices) {
@@ -149,8 +148,8 @@ sngrt_r3 <- stacked_nsites_genomic_region_mult_thresholds("stat_results/period3/
 
 ## 3. Run FDR ##
 # Extracting mutations from the entire dataset of >1.2 million sequences from England
-cog_md_muts_p2 <- extract_muts_period("rds/sc2_md_curated.rds", as.Date("2021-11-15")) #, "period2"
-cog_md_muts_p3 <- extract_muts_period("rds/sc2_md_curated.rds", as.Date("2022-04-30")) #, "period3"
+cog_md_muts_p2 <- extract_muts_period("rds/sc2_md_curated.rds", as.Date("2021-11-15"))
+cog_md_muts_p3 <- extract_muts_period("rds/sc2_md_curated.rds", as.Date("2022-04-30"))
 
 # Computing codon positions of mutations
 muts_match_codons_p2 <- compute_muts_match_codons(cog_md_muts_p2[[1]], cog_md_muts_p2[[2]])
@@ -218,7 +217,6 @@ rm_titles_all <- theme(axis.title.x=element_blank(), axis.title.y=element_blank(
 rm_titles_y <- theme(axis.title.y=element_blank())
 rm_axis_text_x <- theme(axis.text.x=element_blank())
 my_legend <- get_legend(r3[[2]][[1]])
-#ggarrange(legend_1, legend_2, legend_3, nrow=3)
 marg <- ggplot2::theme(plot.margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "cm"))
 f3 <- ggarrange(r2[[2]][[1]] + rm_titles_all + rm_axis_text_x + marg, r2[[2]][[2]] + rm_titles_all + rm_axis_text_x + marg, r3[[2]][[1]] + rm_titles_y + marg, r3[[2]][[2]] + rm_titles_y + marg, align='h', nrow=2, ncol=2, labels=c('A', 'B','C','D'), legend.grob=my_legend, legend="right") #common.legend = T
 annotate_figure(f3, left = text_grob("Genomic region", rot = 90, vjust = 1, size=8))
@@ -229,7 +227,6 @@ r3[[4]]
 ggsave("stat_results/plots_paper/Fig4.eps", device=cairo_ps, units="px", width=2100, height=1850, dpi=300, bg="white")
 
 # Figure 5: spike-wide frequency of TFP-homoplasies & number of identified sites for each genomic position stacked by threshold
-# sngrt_r3 variable from analysis_mult_thresholds.R
 f5_configs <- theme(axis.title.x=element_text(size=8), axis.title.y=element_text(size=8), axis.text.y=element_text(size=6, color="black"), axis.text.x=element_text(size=7, color="black"))
-ggarrange(r3[[3]] + f5_configs, sngrt_r3 + f5_configs, nrow=2, ncol=1, labels=c('A', 'B'), legend="right") #common.legend = T
+ggarrange(r3[[3]] + f5_configs, sngrt_r3 + f5_configs, nrow=2, ncol=1, labels=c('A', 'B'), legend="right")
 ggsave("stat_results/plots_paper/Fig5.eps", units="px", device=cairo_ps, width=2000, height=1750, dpi=300, bg="white")
