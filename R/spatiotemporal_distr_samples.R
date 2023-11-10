@@ -2,10 +2,20 @@ libs_load <- c("mlscluster","glue","dplyr", "ggplot2","tidyverse", "viridis")
 invisible( lapply(libs_load, library, character.only=TRUE) )
 
 # Plot distribution of sequences included (fig. 2)
-sc2_md_curated <- readRDS(system.file("extdata", "sc2_md_curated.rds", package="mlscluster"))
+sc2_md_curated <- readRDS("rds/before_major_changes_30Oct2023/sc2_md_curated_WITH_ADM2.rds") #readRDS(system.file("extdata", "sc2_md_curated.rds", package="mlscluster"))
+
+sc2_md_curated$major_lineage[sc2_md_curated$major_lineage == "Alpha_B.1.1.7"] <- "B.1.1.7"
+sc2_md_curated$major_lineage[sc2_md_curated$major_lineage == "Delta_AY.4.*"] <- "AY.4.*"
+sc2_md_curated$major_lineage[sc2_md_curated$major_lineage == "Delta_other"] <- "AY.* (non-AY.4.*)"
+sc2_md_curated$major_lineage[sc2_md_curated$major_lineage == "EU1_B.1.177"] <- "B.1.177.*"
+sc2_md_curated$major_lineage[sc2_md_curated$major_lineage == "Omicron_BA.1.*"] <- "BA.1.*"
+sc2_md_curated$major_lineage[sc2_md_curated$major_lineage == "Omicron_BA.2.*"] <- "BA.2.*"
+
+sc2_md_curated$major_lineage <-  factor(sc2_md_curated$major_lineage, levels = c("Other","B.1.177.*","B.1.1.7","AY.* (non-AY.4.*)","AY.4.*","BA.1.*","BA.2.*"))
 
 # Palette for major_lineages
-pal_lineages <- c("Alpha_B.1.1.7"="#fd7f6f", "Delta_AY.4.*"="#7eb0d5", "Delta_other"="#b2e061", "EU1_B.1.177"="#bd7ebe", "Omicron_BA.1.*"="#ffb55a", "Omicron_BA.2.*"="#ffcc00", "Other"="#fdcce5")
+#pal_lineages <- c("Alpha_B.1.1.7"="#fd7f6f", "Delta_AY.4.*"="#7eb0d5", "Delta_other"="#b2e061", "EU1_B.1.177"="#bd7ebe", "Omicron_BA.1.*"="#ffb55a", "Omicron_BA.2.*"="#ffcc00", "Other"="#fdcce5")
+pal_lineages <- c("B.1.1.7"="#fd7f6f", "AY.4.*"="#7eb0d5", "AY.* (non-AY.4.*)"="#b2e061", "B.1.177.*"="#bd7ebe", "BA.1.*"="#ffb55a", "BA.2.*"="#ffcc00", "Other"="#fdcce5")
 
 sc2_md_curated2 <- sc2_md_curated
 sc2_md_curated2$month <-as.Date(cut(sc2_md_curated2$sample_date, breaks = "1 month"))
@@ -45,7 +55,8 @@ library(sp)
 library(raster)
 library(broom)
 
-shp <- getData('GADM', country='GBR', level = 2, path="data/") 
+#shp <- getData('GADM', country='GBR', level = 2, path="data/") 
+shp <- readRDS("data/no_repo/gadm36_GBR_2_sp.rds")
 head(shp, 3)
 shp_england <- shp[shp$NAME_1 == "England",]
 sort(unique(shp_england$NAME_2))
@@ -193,8 +204,8 @@ plot_map_periods <- function(period=5, label="Jun 2020 to Apr 2022", matches_cas
 	print(median(counts_seqs_shp$prop, na.rm=T))
 	print(IQR(counts_seqs_shp$prop, na.rm=T))
  
-	p <- ggplot(data = counts_seqs_shp, aes(x = long, y = lat, group = group, fill = prop)) + ggtitle(glue("{label} ({nrow(counts_seqs_all_map)} adm2 regions)")) +
-		geom_polygon(color="grey20", linewidth=0.1) + coord_equal() + theme_void() + theme(legend.position=c(0.15,0.45),plot.title = element_text(hjust = 0.5, size=9),legend.text=element_text(size=6), legend.title=element_text(size=7)) + #0.2,0.6
+	p <- ggplot(data = counts_seqs_shp, aes(x = long, y = lat, group = group, fill = prop)) + ggtitle(glue("{label} ({nrow(counts_seqs_all_map)} adm2 regions)")) + #+ coord_equal() 
+		geom_polygon(color="grey20", linewidth=0.1) + theme_void() + theme(legend.position=c(0.15,0.45),plot.title = element_text(hjust = 0.5, size=8),legend.text=element_text(size=5), legend.title=element_text(size=7)) + #0.2,0.6
 		scale_fill_continuous(type = "viridis", direction=-1, name="Proportion of cases\nsequenced (%)", trans = trim_tails(range = c(0,25)))#, breaks=seq(from=0, to=max_n, by=break_every), limits=c(0,max_n)) #na.value="white",
 	return(p)
 }
@@ -208,9 +219,9 @@ for(i in 1:5) {
 library(ggpubr)
 plot_maps_list_1_4 <- plot_maps_list[c(1, 2, 3, 4)]
 ggarrange(plotlist=plot_maps_list_1_4, ncol=2, nrow=2)
-ggsave("stat_results/plots_paper/england_maps/maps_p1_p4.eps", device=cairo_ps, units="px", width=2100, height=1850, dpi=300, bg="white")
-ggsave("stat_results/plots_paper/england_maps/map_complete_period.eps", plot=plot_maps_list[[5]], device=cairo_ps, units="px", width=1000, height=800, dpi=300, bg="white")
+ggsave("stat_results/plots_paper/england_maps/maps_p1_p4.pdf", units="px", width=2100, height=1850, dpi=300, bg="white") #device=cairo_ps
+ggsave("stat_results/plots_paper/england_maps/map_complete_period.pdf", plot=plot_maps_list[[5]], units="px", width=1000, height=800, dpi=300, bg="white") #device=cairo_ps
 
 pl2 <- plot_maps_list[[5]]
 pl1 + annotation_custom(ggplotGrob(pl2), ymin=60000, ymax=150000, xmin=as.Date("2020-07-01"), xmax=as.Date("2021-06-01"))#, xmin = 1, xmax = 3, ymin = -0.3, ymax = 0.6)
-ggsave("stat_results/plots_paper/Fig2.eps", device=cairo_ps, units="px", width=2000, height=1750, dpi=300, bg="white")
+ggsave("stat_results/plots_paper/Fig2.pdf", units="px", width=2000, height=1750, dpi=300, bg="white") # device=cairo_ps

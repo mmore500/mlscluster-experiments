@@ -4,6 +4,7 @@
 .Ruserdata
 *.Rproj
 data/no_repo/
+data/insp/
 R/hpc/
 results/
 stat_results/
