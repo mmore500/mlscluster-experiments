@@ -1,5 +1,7 @@
 # mlscluster-experiments
 
+[![DOI](https://zenodo.org/badge/685186608.svg)](https://zenodo.org/doi/10.5281/zenodo.10520059)
+
 This repository contains the code needed to reproduce the results in the *mlscluster* paper.
 
 Fork this repo and install the mlscluster package using `devtools::install_github("mrc-ide/mlscluster")` to have everything set up.
