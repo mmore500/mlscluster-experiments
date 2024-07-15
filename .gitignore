@@ -9,3 +9,5 @@ R/hpc/
 results/
 stat_results/
 rds/
+data/*.gz
+*.gz
