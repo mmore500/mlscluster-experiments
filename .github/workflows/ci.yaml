@@ -17,7 +17,7 @@ jobs:
         run: |
           sudo apt-get update
           # Install required system libraries
-          sudo apt-get install -y curl libgit2-dev libfribidi-dev libcurl4-openssl-dev
+          sudo apt-get install -y curl libgit2-dev libfribidi-dev libcurl4-openssl-dev libfontconfig1-dev
 
 
       - name: Set up R 4.4.0
