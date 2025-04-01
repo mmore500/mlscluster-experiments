@@ -12,8 +12,10 @@ path_thresholds <- c(glue::glue("{thr_pref}_0.25"), glue::glue("{thr_pref}_0.5")
 																					glue::glue("{thr_pref}_3"), glue::glue("{thr_pref}_4"), glue::glue("{thr_pref}_5"), glue::glue("{thr_pref}_10"), glue::glue("{thr_pref}_25"))
 
 # Load metadata and tree
-sc2_md_curated <- readRDS("rds/sc2_md_curated_WITH_Xs_Ns.rds")
-sc2_tre_curated <- readRDS("rds/sc2_tre_curated.rds")
+# sc2_md_curated <- readRDS("rds/sc2_md_curated_WITH_Xs_Ns.rds")
+# sc2_tre_curated <- readRDS("rds/sc2_tre_curated.rds")
+sc2_md_curated <- readRDS(url("https://osf.io/f953r/download", "rb"))
+sc2_tre_curated <- readRDS(url("https://osf.io/24r3e/download", "rb"))
 
 #options(max.print=999999)
 
@@ -52,7 +54,8 @@ message(paste("Total time elapsed:",total_time_p1_t,"mins"))
 # total_time_p2 <- as.numeric (end - start, units = "mins")
 # message(paste("Total time elapsed:",total_time_p2,"mins")) # ~15 hours
 #saveRDS(res_p2, "rds/res_p2.rds")
-res_p2 <- readRDS("rds/res_p2.rds") #readRDS(system.file("extdata", "res_p2.rds", package="mlscluster"))
+# res_p2 <- readRDS("rds/res_p2.rds") #readRDS(system.file("extdata", "res_p2.rds", package="mlscluster"))
+res_p2 <- readRDS(url("https://osf.io/hx9d3/download", "rb"))
 
 start <- Sys.time()
 for(i in 1:length(thr)) {
@@ -76,7 +79,8 @@ message(paste("Total time elapsed:",total_time_p2_t,"mins"))
 # total_time_p3 <- as.numeric (end - start, units = "mins")
 # message(paste("Total time elapsed:",total_time_p3,"mins")) # ~44 hours
 #saveRDS(res_p3, "rds/res_p3.rds")
-res_p3 <- readRDS("rds/res_p3.rds") #readRDS(system.file("extdata", "res_p3.rds", package="mlscluster"))
+# res_p3 <- readRDS("rds/res_p3.rds") #readRDS(system.file("extdata", "res_p3.rds", package="mlscluster"))
+res_p3 <- readRDS(url("https://osf.io/9tnck/download", "rb"))
 
 start <- Sys.time()
 for(i in 1:length(thr)) {
