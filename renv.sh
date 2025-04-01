@@ -12,7 +12,7 @@ if (!requireNamespace("renv", quietly = TRUE)) {
 renv::init(bare = TRUE)
 
 # Define the CRAN packages to install
-cran_packages <- c("glue", "ggplot2", "ggpubr")
+cran_packages <- c("glue", "ggplot2", "ggpubr", "pbmcapply")
 
 # Install the CRAN packages
 install.packages(cran_packages, repos = "https://cloud.r-project.org")
