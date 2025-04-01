@@ -8,6 +8,7 @@ data/insp/
 R/hpc/
 results/
 stat_results/
+Rplots.pdf
 rds/
 data/*.gz
 *.gz
