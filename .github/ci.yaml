@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          # Install R (stable version) and R development package
+          sudo apt-get install -y r-base r-base-dev
+          # Install required system libraries
+          sudo apt-get install -y libgit2-dev libfribidi-dev
+
+      - name: Setup renv and restore packages
+        run: |
+          # Install renv if not already available
+          Rscript -e "if (!requireNamespace('renv', quietly = TRUE)) install.packages('renv', repos='https://cloud.r-project.org')"
+          # Activate the renv project (assumes renv is already initialized in the repository)
+          Rscript -e "renv::activate()"
+          # Restore packages based on the lockfile (if available)
+          Rscript -e "renv::restore()"
+
+      - name: Run R script
+        run: Rscript R/running.R
+
+      - name: Upload results artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: results
+          path: results/
