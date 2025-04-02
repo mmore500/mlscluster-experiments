@@ -13,7 +13,7 @@ renv::init(bare = TRUE)
 
 # Define the CRAN packages to install
 cran_packages <- c(
-  "glue", "ggplot2", "ggpubr", "jsonlite", "pbmcapply", "readr"
+  "glue", "ggplot2", "ggpubr", "jsonlite", "optparse", "pbmcapply", "readr"
 )
 
 # Install the CRAN packages
