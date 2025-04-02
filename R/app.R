@@ -3,6 +3,8 @@ libs_load <- c("mlscluster", "glue", "ggplot2", "ggpubr")
 invisible(lapply(libs_load, library, character.only = TRUE))
 
 NCPU <- 7
+PERIOD_INTEREST <- 2  # somehow needed in stats_multiple_thresholds, wtf
+THRESHOLD_INTEREST <- 2
 options(scipen = 999)
 
 thr <- c(0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 10, 25)
@@ -110,64 +112,8 @@ message(paste(
   "mins"
 ))
 
-# IMPORTANT: this part is commented because it is
-# time-consuming (see README.md and run in a server if you
-# want to get `res_p2` by yourself) Period 2: june 2020 to
-# mid-November 2021 start <- Sys.time() res_p2 <-
-# mlsclust(sc2_tre_curated, sc2_md_curated,
-# min_descendants=10, max_descendants=20e3,
-# min_cluster_age_yrs=1/12,
-# \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tmin_date=as.Date('2019-12-30'),
-# max_date=as.Date('2021-11-15'),
-# branch_length_unit='days', rm_seq_artifacts=TRUE,
-# defining_mut_threshold=0.75,
-# \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\troot_on_tip='Wuhan/WH04/2020',
-# root_on_tip_sample_time=2019.995, detailed_output=FALSE,
-# ncpu=15) end <- Sys.time() total_time_p2 <- as.numeric
-# (end - start, units = 'mins') message(paste('Total time
-# elapsed:',total_time_p2,'mins')) # ~15 hours
-# saveRDS(res_p2, 'rds/res_p2.rds') res_p2 <-
-# readRDS('rds/res_p2.rds') #readRDS(system.file('extdata',
-# 'res_p2.rds', package='mlscluster'))
-res_p2 <- readRDS(url(
-  "https://osf.io/hx9d3/download",
-  "rb"
-))
-
-start <- Sys.time()
-for (i in 1:length(thr)) {
-  run_diff_thresholds(
-    stats_df_unfilt = res_p2[[1]],
-    tgt_nodes = res_p2[[2]],
-    homoplasies = res_p2[[3]],
-    output_dir = glue(
-      "results/02_sc2_root_to_nov2021/threshold_quantile_{thr[[i]]}/"
-    ),
-    quantile_choice = quantl[i],
-    quantile_threshold_ratio_sizes = thr[i],
-    quantile_threshold_ratio_persist_time = thr[i],
-    quantile_threshold_logit_growth = thr[i],
-    threshold_keep_lower = TRUE,
-    compute_tree_annots = FALSE,
-    plot_global_mut_freq = FALSE,
-    detailed_output = FALSE
-  ) # desc_sisters=list(res_p2[[4]], res_p2[[5]]), amd=res_p2[[6]]
-}
-end <- Sys.time()
-total_time_p2_t <- as.numeric(end - start, units = "mins")
-message(paste(
-  "Total time elapsed:",
-  total_time_p2_t,
-  "mins"
-))
-
-
 ## 2. Run statistical tests for multiple thresholds ##
-print("=========")
-print("PERIOD 2 (PRE-OMICRON)")
-print("=========")
-# FOR PERIOD 2 Expected paths containing results for each
-# quantile threshold
+# Expected paths containing results for each quantile threshold
 table_names_periods <- c(2)
 table_names_thresholds <- c(
   0.25,
@@ -192,11 +138,9 @@ table_combs <- do.call(
   )
 )
 out_folder <- "period2"
-PERIOD_INTEREST <- 2
 
 system(glue("mkdir -p stat_results/plots_paper/"))
-# Override pal_lineages from package with new major_lineage
-# labels
+# Override pal_lineages from package with new major_lineage labels
 major_lineages <- c(  # somehow needed in stats_multiple_thresholds, wtf
   "B.1.177.*",
   "B.1.1.7",
@@ -205,32 +149,22 @@ major_lineages <- c(  # somehow needed in stats_multiple_thresholds, wtf
   "Other"
 ) # 'Beta_B.1.351','Gamma_P.1'
 rmult_p2 <- stats_multiple_thresholds(
-  "results/02_sc2_root_to_nov2021",
+  "results/01_sc2_root_to_dec2020",
   pal_lineages,
   "period2",
   "ED_FileS1.txt"
 )
-plot_tbc_stats("results/02_sc2_root_to_nov2021", out_folder)
+plot_tbc_stats("results/01_sc2_root_to_dec2020", out_folder)
 stacked_nsites_genomic_region_mult_thresholds(
   "stat_results/period2/genomewide_plot_non-syn/"
 )
 
-## 4. Run for the selected threshold (2% since FDR ~10% and
-## epsilon ~2.5%) ##
-print("=========")
-print("PERIOD 2 (PRE-OMICRON)")
-print("=========")
-# FOR PERIOD 2 Expected paths containing results for each
-# quantile threshold
+## 4. Run for the selected threshold (2% since FDR ~10% and epsilon ~2.5%)
+# Expected paths containing results for each quantile threshold
 out_folder <- "period2_thr2"
-PERIOD_INTEREST <- 2
-THRESHOLD_INTEREST <- 2
-# major_lineages <-
-# c('EU1_B.1.177','Alpha_B.1.1.7','Delta_AY.4.*',
-# 'Delta_other','Other')
 
 r2 <- stats_selected_threshold(
-  "results/02_sc2_root_to_nov2021",
+  "results/01_sc2_root_to_dec2020",
   thr_index = 5,
   pal_lineages,
   out_folder
