@@ -126,3 +126,13 @@ jobs:
           repository: mmore500/mlscluster-experiments
           registry: ghcr.io
           add_git_labels: true
+
+      - name: Test built container smoke
+        run: |
+          # works with the locally built image even if it wasn't pushed
+          docker run --rm mmore500/mlscluster-experiments:latest echo "smoke test ok"
+      - name: Test built container CMD
+        run: |
+          # works with the locally built image even if it wasn't pushed
+          docker run --rm mmore500/mlscluster-experiments:latest
+          echo "Container CMD executed successfully!"
