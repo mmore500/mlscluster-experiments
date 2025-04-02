@@ -28,6 +28,9 @@ res_p1 <- mlsclust(sc2_tre_curated, sc2_md_curated, min_descendants=10, max_desc
 end <- Sys.time()
 total_time_p1 <- as.numeric (end - start, units = "mins")
 message(paste("Total time elapsed:",total_time_p1,"mins"))
+if (!dir.exists("rds/")) {
+	dir.create("rds/")
+}
 saveRDS(res_p1, "rds/res_p1.rds")
 
 #res_p1 <- readRDS("rds/res_p1.rds")
