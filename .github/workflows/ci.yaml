@@ -90,7 +90,10 @@ jobs:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run R script
-        run: Rscript R/running.R
+        run: |
+          timeout 30m Rscript R/running.R \
+            || ( [[ $? -eq 124 ]] && \
+            echo "timing out to prevent job kill due to resource use" )
 
       - name: Consolidate output to results/
         run: |
