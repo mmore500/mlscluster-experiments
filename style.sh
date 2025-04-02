@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/bin/bash
+
+set -euo pipefail
 
 which air >/dev/null 2>&1 || \
-    curl -LsSf "https://github.com/posit-dev/air/releases/0.4.1/download/air-installer.sh" | sh
+    curl -LsSf "https://github.com/posit-dev/air/releases/tag/0.4.1/download/air-installer.sh" | sh
 
 any_changed=0
 
