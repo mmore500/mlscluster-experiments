@@ -1,7 +1,9 @@
 #!/usr/bin/env Rscript
 
 Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 10000) # for gzcon compat, wtf
-options(timeout = 600)
+timeout <- 600
+max_tries <- 10
+options(timeout = timeout)
 
 library("optparse")
 
@@ -174,12 +176,42 @@ message(">>> Run mlsclust")
 ###############################################################################
 
 # Load metadata and tree using the provided URLs (or file paths)
-metadata_df <- unserializeJSON(read_lines(metadata_json))
+for (i in 1:max_tries) {
+  tryCatch(
+    {
+      metadata_df <- unserializeJSON(read_lines(eval(parse(
+        text = opt$metadata_json
+      ))))
+      break
+    },
+    error = function(e) {
+      message("Error reading metadata JSON file: ", e)
+      if (i == max_tries) {
+        stop("Max tries reached. Exiting.")
+      }
+    }
+  )
+}
 system(glue("mkdir -p rds/"))
 writeLines(serializeJSON(metadata_df), "rds/metadata_df.json")
 saveRDS(metadata_df, "rds/metadata_df.rds")
 
-phylogeny_tree <- unserializeJSON(read_lines(phylogeny_json))
+for (i in 1:max_tries) {
+  tryCatch(
+    {
+      phylogeny_tree <- unserializeJSON(read_lines(eval(parse(
+        text = opt$phylogeny_json
+      ))))
+      break
+    },
+    error = function(e) {
+      message("Error reading phylogeny JSON file: ", e)
+      if (i == max_tries) {
+        stop("Max tries reached. Exiting.")
+      }
+    }
+  )
+}
 system(glue("mkdir -p rds/"))
 writeLines(serializeJSON(phylogeny_tree), "rds/phylogeny_tree.json")
 saveRDS(phylogeny_tree, "rds/phylogeny_tree.rds")
