@@ -1,4 +1,158 @@
-# please install those packages if you don't have them
+#!/usr/bin/env Rscript
+library("optparse")
+
+# Define command line options for mlsclust arguments and input data sources.
+option_list = list(
+  make_option(
+    c("--metadata_rds"),
+    type = "character",
+    default = "url('https://osf.io/f953r/download', 'rb')",
+    help = "File path or url for metadata (RDS file) [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--phylogeny_rds"),
+    type = "character",
+    default = "url('https://osf.io/24r3e/download', 'rb')",
+    help = "File path or url for phylogeny tree (RDS file) [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--min_descendants"),
+    type = "character",
+    default = "10",
+    help = "Minimum number of descendants [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--max_descendants"),
+    type = "character",
+    default = "20000",
+    help = "Maximum number of descendants [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--min_cluster_age_yrs"),
+    type = "character",
+    default = "1/12",
+    help = "Minimum cluster age in years [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--min_date"),
+    type = "character",
+    default = "as.Date('2019-12-30')",
+    help = "Minimum date [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--max_date"),
+    type = "character",
+    default = "as.Date('2020-12-31')",
+    help = "Maximum date [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--branch_length_unit"),
+    type = "character",
+    default = "'days'",
+    help = "Branch length unit [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--rm_seq_artifacts"),
+    type = "character",
+    default = "TRUE",
+    help = "Remove sequence artifacts? [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--defining_mut_threshold"),
+    type = "character",
+    default = "0.75",
+    help = "Defining mutation threshold [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--root_on_tip"),
+    type = "character",
+    default = "'Wuhan/WH04/2020'",
+    help = "Tip to root on [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--root_on_tip_sample_time"),
+    type = "character",
+    default = "2019.995",
+    help = "Sample time for the root tip [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--detailed_output"),
+    type = "character",
+    default = "FALSE",
+    help = "Detailed output? [default: %default]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--ncpu"),
+    type = "character",
+    default = "NA",
+    help = "Number of CPU cores [default: detected automatically]",
+    metavar = "character"
+  )
+)
+
+opt_parser = OptionParser(option_list = option_list)
+opt = parse_args(opt_parser)
+
+# Evaluate each argument so that types are correctly set.
+metadata_rds <- eval(parse(text = opt$metadata_rds))
+phylogeny_rds <- eval(parse(text = opt$phylogeny_rds))
+min_descendants <- eval(parse(text = opt$min_descendants))
+max_descendants <- eval(parse(text = opt$max_descendants))
+min_cluster_age_yrs <- eval(parse(text = opt$min_cluster_age_yrs))
+min_date <- eval(parse(text = opt$min_date))
+max_date <- eval(parse(text = opt$max_date))
+branch_length_unit <- eval(parse(text = opt$branch_length_unit))
+rm_seq_artifacts <- eval(parse(text = opt$rm_seq_artifacts))
+defining_mut_threshold <- eval(parse(text = opt$defining_mut_threshold))
+root_on_tip <- eval(parse(text = opt$root_on_tip))
+root_on_tip_sample_time <- eval(parse(text = opt$root_on_tip_sample_time))
+detailed_output <- eval(parse(text = opt$detailed_output))
+
+if (opt$ncpu == "NA") {
+  library(parallel)
+  NCPU <- detectCores()
+  if (is.na(NCPU)) {
+    NCPU <- 7 # Fallback if detection fails
+  }
+  ncpu <- NCPU
+} else {
+  ncpu <- eval(parse(text = opt$ncpu))
+}
+
+print(
+  list(
+    metadata_rds = metadata_rds,
+    phylogeny_rds = phylogeny_rds,
+    min_descendants = min_descendants,
+    max_descendants = max_descendants,
+    min_cluster_age_yrs = min_cluster_age_yrs,
+    min_date = min_date,
+    max_date = max_date,
+    branch_length_unit = branch_length_unit,
+    rm_seq_artifacts = rm_seq_artifacts,
+    defining_mut_threshold = defining_mut_threshold,
+    root_on_tip = root_on_tip,
+    root_on_tip_sample_time = root_on_tip_sample_time,
+    detailed_output = detailed_output
+  )
+)
+
+###############################################################################
+# Load required libraries
+###############################################################################
 libs_load <- c(
   "mlscluster",
   "glue",
@@ -9,38 +163,21 @@ libs_load <- c(
 )
 invisible(lapply(libs_load, library, character.only = TRUE))
 
-library(parallel)
-NCPU <- detectCores()
-if (is.na(NCPU)) {
-  NCPU <- 7 # Fallback if detection fails
-}
 options(scipen = 999)
 
 ###############################################################################
 message(">>> Run mlsclust")
 ###############################################################################
 
-# Load metadata and tree
-metadata_df <- readRDS(url(
-  "https://osf.io/f953r/download",
-  "rb"
-))
+# Load metadata and tree using the provided URLs (or file paths)
+metadata_df <- readRDS(metadata_rds)
 system(glue("mkdir -p rds/"))
-writeLines(
-  serializeJSON(metadata_df),
-  "rds/metadata_df_WITH_Xs_Ns.json"
-)
-saveRDS(metadata_df, "rds/metadata_df_WITH_Xs_Ns.rds")
+writeLines(serializeJSON(metadata_df), "rds/metadata_df.json")
+saveRDS(metadata_df, "rds/metadata_df.rds")
 
-phylogeny_tree <- readRDS(url(
-  "https://osf.io/24r3e/download",
-  "rb"
-))
+phylogeny_tree <- readRDS(phylogeny_rds)
 system(glue("mkdir -p rds/"))
-writeLines(
-  serializeJSON(phylogeny_tree),
-  "rds/phylogeny_tree.json"
-)
+writeLines(serializeJSON(phylogeny_tree), "rds/phylogeny_tree.json")
 saveRDS(phylogeny_tree, "rds/phylogeny_tree.rds")
 
 # test: pass through JSON
@@ -53,18 +190,18 @@ start <- Sys.time()
 mlsclust_result <- mlsclust(
   phylogeny_tree,
   metadata_df,
-  min_descendants = 10,
-  max_descendants = 20000,
-  min_cluster_age_yrs = 1 / 12,
-  min_date = as.Date("2019-12-30"),
-  max_date = as.Date("2020-12-31"),
-  branch_length_unit = "days",
-  rm_seq_artifacts = TRUE,
-  defining_mut_threshold = 0.75,
-  root_on_tip = "Wuhan/WH04/2020",
-  root_on_tip_sample_time = 2019.995,
-  detailed_output = FALSE,
-  ncpu = NCPU
+  min_descendants = min_descendants,
+  max_descendants = max_descendants,
+  min_cluster_age_yrs = min_cluster_age_yrs,
+  min_date = min_date,
+  max_date = max_date,
+  branch_length_unit = branch_length_unit,
+  rm_seq_artifacts = rm_seq_artifacts,
+  defining_mut_threshold = defining_mut_threshold,
+  root_on_tip = root_on_tip,
+  root_on_tip_sample_time = root_on_tip_sample_time,
+  detailed_output = detailed_output,
+  ncpu = ncpu
 )
 # mlsclust_result <- readRDS('rds/mlsclust_result.rds')
 message(paste(
