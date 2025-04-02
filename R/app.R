@@ -16,7 +16,7 @@ if (is.na(NCPU)) {
 options(scipen = 999)
 
 ###############################################################################
-## Run mlsclust
+message(">>> Run mlsclust")
 ###############################################################################
 
 # Load metadata and tree
@@ -68,7 +68,7 @@ writeLines(serializeJSON(res_p1), "rds/res_p1.json")
 # res_p1 <- readRDS('rds/res_p1.rds')
 
 ###############################################################################
-## Thresholds
+message(">>> Thresholds")
 ###############################################################################
 thr <- c(0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 10, 25)
 quantl <- c(
@@ -125,7 +125,7 @@ message(paste(
 ))
 
 ###############################################################################
-## Run statistical tests for multiple thresholds
+message(">>> Run statistical tests for multiple thresholds")
 ###############################################################################
 
 # somehow needed in stats_multiple_thresholds, wtf
@@ -178,7 +178,7 @@ stacked_nsites_genomic_region_mult_thresholds(
 
 
 ###############################################################################
-## Run for the selected threshold (2% since FDR ~10% and epsilon ~2.5%)
+message(">>> Selected threshold (2% since FDR ~10% & epsilon ~2.5%)")
 ###############################################################################
 
 THRESHOLD_INTEREST <- 2
