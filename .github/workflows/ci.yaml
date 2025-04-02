@@ -120,6 +120,7 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           push: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') }}
+          load: true
           tags: ${{ env.TAGS }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
