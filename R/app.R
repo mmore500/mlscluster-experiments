@@ -2,7 +2,11 @@
 libs_load <- c("mlscluster", "glue", "ggplot2", "ggpubr")
 invisible(lapply(libs_load, library, character.only = TRUE))
 
-NCPU <- 7
+library(parallel)
+NCPU <- detectCores()
+if (is.na(NCPU)) {
+  NCPU <- 7  # Fallback if detection fails
+}
 PERIOD_INTEREST <- 2  # somehow needed in stats_multiple_thresholds, wtf
 THRESHOLD_INTEREST <- 2
 options(scipen = 999)
