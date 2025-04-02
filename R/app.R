@@ -4,7 +4,8 @@ libs_load <- c(
   "glue",
   "ggplot2",
   "ggpubr",
-  "jsonlite"
+  "jsonlite",
+  "readr"
 )
 invisible(lapply(libs_load, library, character.only = TRUE))
 
@@ -28,6 +29,9 @@ writeLines(
   serializeJSON(sc2_md_curated),
   "rds/sc2_md_curated_WITH_Xs_Ns.json"
 )
+sc2_md_curated <- unserializeJSON(read_file(
+  "rds/sc2_md_curated_WITH_Xs_Ns.json"
+))
 
 sc2_tre_curated <- readRDS(url(
   "https://osf.io/24r3e/download",
@@ -37,6 +41,7 @@ writeLines(
   serializeJSON(sc2_tre_curated),
   "rds/sc2_tre_curated.json"
 )
+sc2_tre_curated <- unserializeJSON(read_file("rds/sc2_tre_curated.json"))
 
 # ----------------------------------------------------------------------------
 
@@ -65,6 +70,8 @@ message(paste(
 system(glue("mkdir -p rds/"))
 saveRDS(res_p1, "rds/res_p1.rds")
 writeLines(serializeJSON(res_p1), "rds/res_p1.json")
+rds_p1 <- unserializeJSON(read_file("rds/res_p1.json"))
+
 # res_p1 <- readRDS('rds/res_p1.rds')
 
 ###############################################################################
