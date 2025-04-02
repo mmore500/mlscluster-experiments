@@ -146,3 +146,18 @@ jobs:
           # works with the locally built image even if it wasn't pushed
           docker run --rm ghcr.io/mmore500/mlscluster-experiments:latest
           echo "Container CMD executed successfully!"
+
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          # Install required system libraries
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            curl
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - run: ./style.sh
