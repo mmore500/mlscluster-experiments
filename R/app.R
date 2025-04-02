@@ -78,9 +78,7 @@ res_p1 <- mlsclust(
 end <- Sys.time()
 total_time_p1 <- as.numeric(end - start, units = "mins")
 message(paste("Total time elapsed:", total_time_p1, "mins"))
-if (!dir.exists("rds/")) {
-  dir.create("rds/")
-}
+system(glue("mkdir -p rds/"))
 saveRDS(res_p1, "rds/res_p1.rds")
 
 # res_p1 <- readRDS('rds/res_p1.rds')
@@ -195,54 +193,6 @@ table_combs <- do.call(
 )
 out_folder <- "period2"
 PERIOD_INTEREST <- 2
-major_lineages <- c(
-  "B.1.177.*",
-  "B.1.1.7",
-  "AY.4.*",
-  "AY.* (non-AY.4.*)",
-  "Other"
-) # 'Beta_B.1.351','Gamma_P.1'
-
-# Change major_lineage labels
-change_lineage_labels <- function(path_res) {
-  for (i in 1:length(path_thresholds)) {
-    print(path_thresholds[i])
-    d1 <- utils::read.csv(
-      glue::glue(
-        "{path_res}/{path_thresholds[i]}/clustered_all_df.csv"
-      ),
-      header = T
-    )
-    d1$major_lineage[
-      d1$major_lineage == "Alpha_B.1.1.7"
-    ] <- "B.1.1.7"
-    d1$major_lineage[
-      d1$major_lineage == "Delta_AY.4.*"
-    ] <- "AY.4.*"
-    d1$major_lineage[
-      d1$major_lineage == "Delta_other"
-    ] <- "AY.* (non-AY.4.*)"
-    d1$major_lineage[
-      d1$major_lineage == "EU1_B.1.177"
-    ] <- "B.1.177.*"
-    d1$major_lineage[
-      d1$major_lineage == "Omicron_BA.1.*"
-    ] <- "BA.1.*"
-    d1$major_lineage[
-      d1$major_lineage == "Omicron_BA.2.*"
-    ] <- "BA.2.*"
-    utils::write.csv(
-      d1,
-      file = glue::glue(
-        "{path_res}/{path_thresholds[i]}/clustered_all_df.csv"
-      ),
-      quote = F,
-      row.names = F
-    )
-  }
-}
-
-change_lineage_labels("results/02_sc2_root_to_nov2021")
 
 system(glue("mkdir -p stat_results/plots_paper/"))
 # Override pal_lineages from package with new major_lineage
