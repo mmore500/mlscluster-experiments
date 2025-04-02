@@ -29,9 +29,7 @@ writeLines(
   serializeJSON(sc2_md_curated),
   "rds/sc2_md_curated_WITH_Xs_Ns.json"
 )
-sc2_md_curated <- unserializeJSON(read_file(
-  "rds/sc2_md_curated_WITH_Xs_Ns.json"
-))
+saveRDS(sc2_md_curated, "rds/sc2_md_curated_WITH_Xs_Ns.rds")
 
 sc2_tre_curated <- readRDS(url(
   "https://osf.io/24r3e/download",
@@ -41,7 +39,11 @@ writeLines(
   serializeJSON(sc2_tre_curated),
   "rds/sc2_tre_curated.json"
 )
-sc2_tre_curated <- unserializeJSON(read_file("rds/sc2_tre_curated.json"))
+saveRDS(sc2_tre_curated, "rds/sc2_tre_curated.rds")
+
+# test: pass through JSON
+sc2_md_curated <- unserializeJSON(serializeJSON(sc2_md_curated))
+sc2_tre_curated <- unserializeJSON(serializeJSON(sc2_tre_curated))
 
 # ----------------------------------------------------------------------------
 
@@ -69,10 +71,11 @@ message(paste(
 ))
 system(glue("mkdir -p rds/"))
 saveRDS(res_p1, "rds/res_p1.rds")
-writeLines(serializeJSON(res_p1), "rds/res_p1.json")
-rds_p1 <- unserializeJSON(read_file("rds/res_p1.json"))
-
 # res_p1 <- readRDS('rds/res_p1.rds')
+writeLines(serializeJSON(res_p1), "rds/res_p1.json")
+
+# test: pass through JSON
+rds_p1 <- unserializeJSON(serializeJSON(rds_p1))
 
 ###############################################################################
 message(">>> Thresholds")
