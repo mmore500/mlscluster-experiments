@@ -197,6 +197,13 @@ PERIOD_INTEREST <- 2
 system(glue("mkdir -p stat_results/plots_paper/"))
 # Override pal_lineages from package with new major_lineage
 # labels
+major_lineages <- c(  # somehow needed in stats_multiple_thresholds, wtf
+  "B.1.177.*",
+  "B.1.1.7",
+  "AY.4.*",
+  "AY.* (non-AY.4.*)",
+  "Other"
+) # 'Beta_B.1.351','Gamma_P.1'
 rmult_p2 <- stats_multiple_thresholds(
   "results/02_sc2_root_to_nov2021",
   pal_lineages,
