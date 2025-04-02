@@ -29,4 +29,4 @@ devtools::install_github("YuLab-SMU/ggtree@c17773c973d6c4036ee3af40a3957fb74d8ee
 devtools::install_github('mrc-ide/mlscluster@e9f7939ab69a61bc310a968252d96177c59921ba')
 
 # Snapshot the current state of the library to record package versions in renv.lock
-renv::snapshot()
+renv::snapshot(packages = cran_packages)
