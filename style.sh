@@ -3,7 +3,7 @@
 set -euo pipefail
 
 which air >/dev/null 2>&1 || \
-    curl -LsSf "https://github.com/posit-dev/air/releases/tag/0.4.1/download/air-installer.sh" | sh
+    curl --proto '=https' --tlsv1.2 -LsSf https://github.com/posit-dev/air/releases/download/0.4.1/air-installer.sh | sh
 
 any_changed=0
 
