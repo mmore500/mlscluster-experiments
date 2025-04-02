@@ -25,6 +25,7 @@ sc2_md_curated <- readRDS(url(
   "https://osf.io/f953r/download",
   "rb"
 ))
+system(glue("mkdir -p rds/"))
 writeLines(
   serializeJSON(sc2_md_curated),
   "rds/sc2_md_curated_WITH_Xs_Ns.json"
@@ -35,6 +36,7 @@ sc2_tre_curated <- readRDS(url(
   "https://osf.io/24r3e/download",
   "rb"
 ))
+system(glue("mkdir -p rds/"))
 writeLines(
   serializeJSON(sc2_tre_curated),
   "rds/sc2_tre_curated.json"
