@@ -1,20 +1,23 @@
 #!/usr/bin/env Rscript
+
+Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 10000) # for gzcon compat, wtf
+
 library("optparse")
 
 # Define command line options for mlsclust arguments and input data sources.
 option_list = list(
   make_option(
-    c("--metadata_rds"),
+    c("--metadata_json"),
     type = "character",
-    default = "url('https://osf.io/f953r/download', 'rb')",
-    help = "File path or url for metadata (RDS file) [default: %default]",
+    default = "gzcon(url('https://osf.io/xvh7d/download', 'rb'))",
+    help = "File path or url for metadata (JSON file) [default: %default]",
     metavar = "character"
   ),
   make_option(
-    c("--phylogeny_rds"),
+    c("--phylogeny_json"),
     type = "character",
-    default = "url('https://osf.io/24r3e/download', 'rb')",
-    help = "File path or url for phylogeny tree (RDS file) [default: %default]",
+    default = "gzcon(url('https://osf.io/85s3q/download', 'rb'))",
+    help = "File path or url for phylogeny tree (JSON file) [default: %default]",
     metavar = "character"
   ),
   make_option(
@@ -107,8 +110,8 @@ opt_parser = OptionParser(option_list = option_list)
 opt = parse_args(opt_parser)
 
 # Evaluate each argument so that types are correctly set.
-metadata_rds <- eval(parse(text = opt$metadata_rds))
-phylogeny_rds <- eval(parse(text = opt$phylogeny_rds))
+metadata_json <- eval(parse(text = opt$metadata_json))
+phylogeny_json <- eval(parse(text = opt$phylogeny_json))
 min_descendants <- eval(parse(text = opt$min_descendants))
 max_descendants <- eval(parse(text = opt$max_descendants))
 min_cluster_age_yrs <- eval(parse(text = opt$min_cluster_age_yrs))
@@ -134,8 +137,8 @@ if (opt$ncpu == "NA") {
 
 print(
   list(
-    metadata_rds = metadata_rds,
-    phylogeny_rds = phylogeny_rds,
+    metadata_json = metadata_json,
+    phylogeny_json = phylogeny_json,
     min_descendants = min_descendants,
     max_descendants = max_descendants,
     min_cluster_age_yrs = min_cluster_age_yrs,
@@ -170,19 +173,15 @@ message(">>> Run mlsclust")
 ###############################################################################
 
 # Load metadata and tree using the provided URLs (or file paths)
-metadata_df <- readRDS(metadata_rds)
+metadata_df <- unserializeJSON(read_lines(metadata_json))
 system(glue("mkdir -p rds/"))
 writeLines(serializeJSON(metadata_df), "rds/metadata_df.json")
 saveRDS(metadata_df, "rds/metadata_df.rds")
 
-phylogeny_tree <- readRDS(phylogeny_rds)
+phylogeny_tree <- unserializeJSON(read_lines(phylogeny_json))
 system(glue("mkdir -p rds/"))
 writeLines(serializeJSON(phylogeny_tree), "rds/phylogeny_tree.json")
 saveRDS(phylogeny_tree, "rds/phylogeny_tree.rds")
-
-# test: pass through JSON
-metadata_df <- unserializeJSON(serializeJSON(metadata_df))
-phylogeny_tree <- unserializeJSON(serializeJSON(phylogeny_tree))
 
 # ----------------------------------------------------------------------------
 
