@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 
 Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 10000) # for gzcon compat, wtf
+options(timeout = 600)
 
 library("optparse")
 
