@@ -21,38 +21,38 @@ message(">>> Run mlsclust")
 ###############################################################################
 
 # Load metadata and tree
-sc2_md_curated <- readRDS(url(
+metadata_df <- readRDS(url(
   "https://osf.io/f953r/download",
   "rb"
 ))
 system(glue("mkdir -p rds/"))
 writeLines(
-  serializeJSON(sc2_md_curated),
-  "rds/sc2_md_curated_WITH_Xs_Ns.json"
+  serializeJSON(metadata_df),
+  "rds/metadata_df_WITH_Xs_Ns.json"
 )
-saveRDS(sc2_md_curated, "rds/sc2_md_curated_WITH_Xs_Ns.rds")
+saveRDS(metadata_df, "rds/metadata_df_WITH_Xs_Ns.rds")
 
-sc2_tre_curated <- readRDS(url(
+phylogeny_tree <- readRDS(url(
   "https://osf.io/24r3e/download",
   "rb"
 ))
 system(glue("mkdir -p rds/"))
 writeLines(
-  serializeJSON(sc2_tre_curated),
-  "rds/sc2_tre_curated.json"
+  serializeJSON(phylogeny_tree),
+  "rds/phylogeny_tree.json"
 )
-saveRDS(sc2_tre_curated, "rds/sc2_tre_curated.rds")
+saveRDS(phylogeny_tree, "rds/phylogeny_tree.rds")
 
 # test: pass through JSON
-sc2_md_curated <- unserializeJSON(serializeJSON(sc2_md_curated))
-sc2_tre_curated <- unserializeJSON(serializeJSON(sc2_tre_curated))
+metadata_df <- unserializeJSON(serializeJSON(metadata_df))
+phylogeny_tree <- unserializeJSON(serializeJSON(phylogeny_tree))
 
 # ----------------------------------------------------------------------------
 
 start <- Sys.time()
-res_p1 <- mlsclust(
-  sc2_tre_curated,
-  sc2_md_curated,
+mlsclust_result <- mlsclust(
+  phylogeny_tree,
+  metadata_df,
   min_descendants = 10,
   max_descendants = 20000,
   min_cluster_age_yrs = 1 / 12,
@@ -66,18 +66,36 @@ res_p1 <- mlsclust(
   detailed_output = FALSE,
   ncpu = NCPU
 )
+# mlsclust_result <- readRDS('rds/mlsclust_result.rds')
 message(paste(
   "Total time elapsed:",
   as.numeric(Sys.time() - start, units = "mins"),
   "mins"
 ))
 system(glue("mkdir -p rds/"))
-saveRDS(res_p1, "rds/res_p1.rds")
-# res_p1 <- readRDS('rds/res_p1.rds')
-writeLines(serializeJSON(res_p1), "rds/res_p1.json")
+saveRDS(mlsclust_result, "rds/mlsclust_result.rds")
+writeLines(serializeJSON(mlsclust_result), "rds/mlsclust_result.json")
 
 # test: pass through JSON
-res_p1 <- unserializeJSON(serializeJSON(res_p1))
+mlsclust_result <- unserializeJSON(serializeJSON(mlsclust_result))
+
+# unpack mlsclust_result
+clustering_statistics_df <- mlsclust_result[[1]]
+target_nodes_vector <- mlsclust_result[[2]]
+homoplasy_freq_df <- mlsclust_result[[3]]
+
+writeLines(
+  serializeJSON(clustering_statistics_df),
+  "rds/clustering_statistics_df.json"
+)
+writeLines(
+  serializeJSON(target_nodes_vector),
+  "rds/target_nodes_vector.json"
+)
+writeLines(
+  serializeJSON(homoplasy_freq_df),
+  "rds/homoplasy_freq_df.json"
+)
 
 ###############################################################################
 message(">>> Thresholds")
@@ -114,9 +132,9 @@ path_thresholds <- c(
 start <- Sys.time()
 for (i in 1:length(thr)) {
   run_diff_thresholds(
-    stats_df_unfilt = res_p1[[1]],
-    tgt_nodes = res_p1[[2]],
-    homoplasies = res_p1[[3]],
+    stats_df_unfilt = clustering_statistics_df,
+    tgt_nodes = target_nodes_vector,
+    homoplasies = homoplasy_freq_df,
     output_dir = glue(
       "results/period1/threshold_quantile_{thr[[i]]}/"
     ),
@@ -172,14 +190,14 @@ table_combs <- do.call(
   )
 )
 
+PERIOD_INTEREST <- 2 # somehow needed in stats_multiple_thresholds, wtf
+
 # ----------------------------------------------------------------------------
 
 system(glue("mkdir -p stat_results/plots_paper/"))
-# Override pal_lineages from package with new major_lineage labels
-PERIOD_INTEREST <- 2 # somehow needed in stats_multiple_thresholds, wtf
-rmult_p2 <- stats_multiple_thresholds(
+_ <- stats_multiple_thresholds(
   "results/period1",
-  pal_lineages,
+  pal_lineages, # Override pal_lineages from package with new labels
   "period1",
   "ED_FileS1.txt"
 )
@@ -197,12 +215,13 @@ THRESHOLD_INTEREST <- 2
 
 # ----------------------------------------------------------------------------
 
-r2 <- stats_selected_threshold(
+_ <- stats_selected_threshold(
   "results/period1",
   thr_index = 5,
   pal_lineages,
   "period1_thr2"
 ) # NOTE: thr_index = 5 -> 2%
+
 # Extended data fig. S5: mlscluster, intersection, and hyphy (also stratified
 # by lineage) identified sites for thr=2%
 ggsave(
