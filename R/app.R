@@ -77,7 +77,7 @@ saveRDS(res_p1, "rds/res_p1.rds")
 writeLines(serializeJSON(res_p1), "rds/res_p1.json")
 
 # test: pass through JSON
-rds_p1 <- unserializeJSON(serializeJSON(rds_p1))
+res_p1 <- unserializeJSON(serializeJSON(res_p1))
 
 ###############################################################################
 message(">>> Thresholds")
