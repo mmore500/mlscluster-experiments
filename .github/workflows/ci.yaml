@@ -131,9 +131,9 @@ jobs:
       - name: Test built container smoke
         run: |
           # works with the locally built image even if it wasn't pushed
-          docker run --rm mmore500/mlscluster-experiments:latest echo "smoke test ok"
+          docker run --rm ghcr.io/mmore500/mlscluster-experiments:latest echo "smoke test ok"
       - name: Test built container CMD
         run: |
           # works with the locally built image even if it wasn't pushed
-          docker run --rm mmore500/mlscluster-experiments:latest
+          docker run --rm ghcr.io/mmore500/mlscluster-experiments:latest
           echo "Container CMD executed successfully!"
