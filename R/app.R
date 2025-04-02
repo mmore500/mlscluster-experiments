@@ -1,5 +1,11 @@
 # please install those packages if you don't have them
-libs_load <- c("mlscluster", "glue", "ggplot2", "ggpubr")
+libs_load <- c(
+  "mlscluster",
+  "glue",
+  "ggplot2",
+  "ggpubr",
+  "jsonlite"
+)
 invisible(lapply(libs_load, library, character.only = TRUE))
 
 library(parallel)
@@ -18,10 +24,19 @@ sc2_md_curated <- readRDS(url(
   "https://osf.io/f953r/download",
   "rb"
 ))
+writeLines(
+  serializeJSON(sc2_md_curated),
+  "rds/sc2_md_curated_WITH_Xs_Ns.json"
+)
+
 sc2_tre_curated <- readRDS(url(
   "https://osf.io/24r3e/download",
   "rb"
 ))
+writeLines(
+  serializeJSON(sc2_tre_curated),
+  "rds/sc2_tre_curated.json"
+)
 
 # ----------------------------------------------------------------------------
 
@@ -49,7 +64,7 @@ message(paste(
 ))
 system(glue("mkdir -p rds/"))
 saveRDS(res_p1, "rds/res_p1.rds")
-
+writeLines(serializeJSON(res_p1), "rds/res_p1.json")
 # res_p1 <- readRDS('rds/res_p1.rds')
 
 ###############################################################################
