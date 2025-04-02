@@ -16,6 +16,12 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - R/running.R
+          - R/app.R
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -91,7 +97,7 @@ jobs:
 
       - name: Run R script
         run: |
-          timeout 30m Rscript R/running.R \
+          timeout 30m Rscript ${{ matrix.target }} \
             || ( [[ $? -eq 124 ]] && \
             echo "timing out to prevent job kill due to resource use" )
 
