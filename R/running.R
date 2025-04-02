@@ -173,8 +173,8 @@ sngrt_r3 <- stacked_nsites_genomic_region_mult_thresholds("stat_results/period3/
 
 ## 3. Run FDR ##
 # Extracting mutations from the entire dataset of >1.2 million sequences from England
-cog_md_muts_p2 <- extract_muts_period("rds/sc2_md_curated_WITH_Xs_Ns.rds", as.Date("2021-11-15")) # this might need >16 GB of RAM
-cog_md_muts_p3 <- extract_muts_period("rds/sc2_md_curated_WITH_Xs_Ns.rds", as.Date("2022-04-30"))
+cog_md_muts_p2 <- extract_muts_period(url("https://osf.io/f953r/download", "rb"), as.Date("2021-11-15")) # this might need >16 GB of RAM
+cog_md_muts_p3 <- extract_muts_period(url("https://osf.io/f953r/download", "rb"), as.Date("2022-04-30"))
 
 # Computing codon positions of mutations
 muts_match_codons_p2 <- compute_muts_match_codons(cog_md_muts_p2[[1]], cog_md_muts_p2[[2]])
