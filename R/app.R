@@ -92,7 +92,7 @@ for (i in 1:length(thr)) {
     tgt_nodes = res_p1[[2]],
     homoplasies = res_p1[[3]],
     output_dir = glue(
-      "results/01_sc2_root_to_dec2020/threshold_quantile_{thr[[i]]}/"
+      "results/period1/threshold_quantile_{thr[[i]]}/"
     ),
     quantile_choice = quantl[i],
     quantile_threshold_ratio_sizes = thr[i],
@@ -137,7 +137,7 @@ table_combs <- do.call(
     sep = "_"
   )
 )
-out_folder <- "period2"
+out_folder <- "period1"
 
 system(glue("mkdir -p stat_results/plots_paper/"))
 # Override pal_lineages from package with new major_lineage labels
@@ -149,22 +149,22 @@ major_lineages <- c(  # somehow needed in stats_multiple_thresholds, wtf
   "Other"
 ) # 'Beta_B.1.351','Gamma_P.1'
 rmult_p2 <- stats_multiple_thresholds(
-  "results/01_sc2_root_to_dec2020",
+  "results/period1",
   pal_lineages,
-  "period2",
+  "period1",
   "ED_FileS1.txt"
 )
-plot_tbc_stats("results/01_sc2_root_to_dec2020", out_folder)
+plot_tbc_stats("results/period1", out_folder)
 stacked_nsites_genomic_region_mult_thresholds(
-  "stat_results/period2/genomewide_plot_non-syn/"
+  "stat_results/period1/genomewide_plot_non-syn/"
 )
 
 ## 4. Run for the selected threshold (2% since FDR ~10% and epsilon ~2.5%)
 # Expected paths containing results for each quantile threshold
-out_folder <- "period2_thr2"
+out_folder <- "period1_thr2"
 
 r2 <- stats_selected_threshold(
-  "results/01_sc2_root_to_dec2020",
+  "results/period1",
   thr_index = 5,
   pal_lineages,
   out_folder
