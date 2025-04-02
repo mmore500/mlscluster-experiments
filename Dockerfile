@@ -36,5 +36,9 @@ RUN Rscript -e "install.packages('devtools', repos='https://cloud.r-project.org'
     Rscript -e "devtools::install_github('YuLab-SMU/ggtree@c17773c973d6c4036ee3af40a3957fb74d8ee9ff')" && \
     Rscript -e "devtools::install_github('mrc-ide/mlscluster@e9f7939ab69a61bc310a968252d96177c59921ba')"
 
+# Install renv and restore the R package library from renv.lock
+RUN Rscript -e "install.packages('renv', repos='https://cloud.r-project.org')" && \
+    Rscript -e "renv::restore(prompt = FALSE)"
+
 # Run the R script and consolidate outputs
 CMD ["bash", "-c", "Rscript R/running.R"]
