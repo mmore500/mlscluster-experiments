@@ -105,12 +105,13 @@ jobs:
         run: |
           mv Rplots.pdf results/ || echo "Rplots.pdf not found"
           mv stat_results results/ || echo "stat_results not found"
+          tar -czvf results.tar.gz results/
 
       - name: Upload results artifact
         uses: actions/upload-artifact@v4
         with:
           name: results
-          path: results/
+          path: results.tar.gz
 
   deploy-ghcr:
     name: Docker Image Deploy
