@@ -41,4 +41,4 @@ RUN Rscript -e "install.packages('renv', repos='https://cloud.r-project.org')" &
     Rscript -e "renv::restore(prompt = FALSE)"
 
 # Run the R script and consolidate outputs
-CMD ["bash", "-c", "Rscript R/app.R"]
+CMD ["bash", "-c", "exec Rscript R/app.R \"$@\"", "--"]
