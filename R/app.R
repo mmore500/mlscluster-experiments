@@ -385,25 +385,27 @@ THRESHOLD_INTEREST <- 2
 
 # ----------------------------------------------------------------------------
 
-tryCatch({
-  stats_selected_threshold(
-    "results/period1",
-    thr_index = 5,
-    pal_lineages,
-    "period1_thr2"
-  ) # NOTE: thr_index = 5 -> 2%
+tryCatch(
+  {
+    stats_selected_threshold(
+      "results/period1",
+      thr_index = 5,
+      pal_lineages,
+      "period1_thr2"
+    ) # NOTE: thr_index = 5 -> 2%
 
-  # Extended data fig. S5: mlscluster, intersection, and hyphy (also stratified
-  # by lineage) identified sites for thr=2%
-  ggsave(
-    glue("stat_results/plots_paper/ED_FigS5.png"),
-    units = "px",
-    width = 2200,
-    height = 2500,
-    dpi = 300,
-    bg = "white"
-  )
-},
+    # Extended data fig. S5: mlscluster, intersection, and hyphy (also stratified
+    # by lineage) identified sites for thr=2%
+    ggsave(
+      glue("stat_results/plots_paper/ED_FigS5.png"),
+      units = "px",
+      width = 2200,
+      height = 2500,
+      dpi = 300,
+      bg = "white"
+    )
+  },
   error = function(e) {
     message("Error in stats_selected_threshold: ", e)
-})
+  }
+)
