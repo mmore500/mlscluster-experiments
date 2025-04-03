@@ -1,11 +1,26 @@
 #!/usr/bin/env Rscript
 
+###############################################################################
+# Load required libraries
+###############################################################################
+libs_load <- c(
+  "mlscluster",
+  "glue",
+  "ggplot2",
+  "ggpubr",
+  "jsonlite",
+  "optparse",
+  "readr"
+)
+invisible(lapply(libs_load, library, character.only = TRUE))
+
+options(scipen = 999)
 Sys.setenv("VROOM_CONNECTION_SIZE" = 131072 * 10000) # for gzcon compat, wtf
 timeout <- 600
 max_tries <- 10
 options(timeout = timeout)
 
-library("optparse")
+# ----------------------------------------------------------------------------
 
 # Define command line options for mlsclust arguments and input data sources.
 option_list = list(
@@ -157,25 +172,30 @@ print(
 )
 
 ###############################################################################
-# Load required libraries
-###############################################################################
-libs_load <- c(
-  "mlscluster",
-  "glue",
-  "ggplot2",
-  "ggpubr",
-  "jsonlite",
-  "readr"
-)
-invisible(lapply(libs_load, library, character.only = TRUE))
-
-options(scipen = 999)
-
-###############################################################################
 message(">>> Run mlsclust")
 ###############################################################################
 
 # Load metadata and tree using the provided URLs (or file paths)
+for (i in 1:max_tries) {
+  tryCatch(
+    {
+      phylogeny_tree <- unserializeJSON(read_lines(eval(parse(
+        text = opt$phylogeny_json
+      ))))
+      break
+    },
+    error = function(e) {
+      message("Error reading phylogeny JSON file: ", e)
+      if (i == max_tries) {
+        stop("Max tries reached. Exiting.")
+      }
+    }
+  )
+}
+system(glue("mkdir -p rds/"))
+writeLines(serializeJSON(phylogeny_tree), "rds/phylogeny_tree.json")
+saveRDS(phylogeny_tree, "rds/phylogeny_tree.rds")
+
 for (i in 1:max_tries) {
   tryCatch(
     {
@@ -196,25 +216,6 @@ system(glue("mkdir -p rds/"))
 writeLines(serializeJSON(metadata_df), "rds/metadata_df.json")
 saveRDS(metadata_df, "rds/metadata_df.rds")
 
-for (i in 1:max_tries) {
-  tryCatch(
-    {
-      phylogeny_tree <- unserializeJSON(read_lines(eval(parse(
-        text = opt$phylogeny_json
-      ))))
-      break
-    },
-    error = function(e) {
-      message("Error reading phylogeny JSON file: ", e)
-      if (i == max_tries) {
-        stop("Max tries reached. Exiting.")
-      }
-    }
-  )
-}
-system(glue("mkdir -p rds/"))
-writeLines(serializeJSON(phylogeny_tree), "rds/phylogeny_tree.json")
-saveRDS(phylogeny_tree, "rds/phylogeny_tree.rds")
 
 # ----------------------------------------------------------------------------
 
