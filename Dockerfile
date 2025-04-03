@@ -1,5 +1,5 @@
-# Use the official Rocker image for R 4.3.3
-FROM rocker/r-ver:4.3.3
+# Use the official Rocker image for R 4.2.3
+FROM rocker/r-ver:4.2.3
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
