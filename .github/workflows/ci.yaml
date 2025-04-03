@@ -107,6 +107,7 @@ jobs:
 
       - name: Consolidate output to results/
         run: |
+          mkdir -p results
           mv Rplots.pdf results/ || echo "Rplots.pdf not found"
           mv stat_results results/ || echo "stat_results not found"
           tar -czvf results.tar.gz results/
