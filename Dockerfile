@@ -25,14 +25,14 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# Install R package dependencies
-RUN ./install_packages.sh
-
 # Set the working directory inside the container
 WORKDIR /app
 
 # Copy your repository files into the container
 COPY . /app
+
+# Install R package dependencies
+RUN ./install_packages.sh
 
 # Run the R script and consolidate outputs
 CMD ["bash", "-c", "exec Rscript R/app.R \"$@\"", "--"]
