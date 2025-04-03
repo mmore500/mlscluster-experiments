@@ -365,7 +365,7 @@ PERIOD_INTEREST <- 2 # somehow needed in stats_multiple_thresholds, wtf
 # ----------------------------------------------------------------------------
 
 system(glue("mkdir -p stat_results/plots_paper/"))
-_ <- stats_multiple_thresholds(
+stats_multiple_thresholds(
   "results/period1",
   pal_lineages, # Override pal_lineages from package with new labels
   "period1",
@@ -385,7 +385,7 @@ THRESHOLD_INTEREST <- 2
 
 # ----------------------------------------------------------------------------
 
-_ <- stats_selected_threshold(
+stats_selected_threshold(
   "results/period1",
   thr_index = 5,
   pal_lineages,
