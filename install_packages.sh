@@ -11,6 +11,12 @@ rm -rf renv/ renv.lock .Rprofile
 echo "Installing R packages globally..."
 
 Rscript -e '
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools", repos = "https://cloud.r-project.org")
+}
+'
+
+Rscript -e '
 # Define CRAN packages
 direct_packages <- c(
   "glue", "ggplot2", "ggpubr", "jsonlite", "optparse", "pbmcapply", "readr"
@@ -19,7 +25,7 @@ direct_packages <- c(
 indirect_packages <- c(
   "askpass", "base64enc", "brew", "brio", "bslib", "cachem", "callr", "cli",
   "clipr", "commonmark", "cpp11", "crayon", "credentials", "curl", "desc",
-  "devtools", "diffobj", "digest", "downlit", "ellipsis", "evaluate", "fansi",
+  "diffobj", "digest", "downlit", "ellipsis", "evaluate", "fansi",
   "fastmap", "fontawesome", "fs", "gert", "gh", "gitcreds", "glue", "highr",
   "htmltools", "htmlwidgets", "httpuv", "httr2", "ini", "jquerylib", "jsonlite",
   "knitr", "later", "lifecycle", "magrittr", "memoise", "mime", "miniUI",
@@ -36,12 +42,10 @@ cran_packages <- c(direct_packages, indirect_packages)
 
 # Install CRAN packages
 install.packages(cran_packages, repos = "https://cloud.r-project.org")
+'
 
+Rscript -e '
 # Install GitHub packages
-if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools", repos = "https://cloud.r-project.org")
-}
-
 devtools::install_github("YuLab-SMU/ggtree@c17773c973d6c4036ee3af40a3957fb74d8ee9ff")
 devtools::install_github("mmore500/mlscluster@85a39581ed84726c29afb8b5ae74b5f524b998df")
 '
