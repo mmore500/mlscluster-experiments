@@ -124,7 +124,7 @@ jobs:
         with:
           name: results-${{ steps.slugify.outputs.slug }}
           path: results.tar.gz
-  
+
   norenv:
     runs-on: ubuntu-24.04
     strategy:
