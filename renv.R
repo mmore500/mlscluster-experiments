@@ -119,16 +119,17 @@ cran_packages <- c(
 )
 
 # Install the CRAN packages
-install.packages(cran_packages, repos = "https://cloud.r-project.org")
+# https://posit.co/blog/migrating-from-mran-to-posit-package-manager/
+install.packages(cran_packages, repos = "https://packagemanager.posit.co/cran/2023-11-10/")
 
 # Ensure devtools is installed for GitHub installations
 if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools", repos = "https://cloud.r-project.org")
+  install.packages("devtools", repos = "https://packagemanager.posit.co/cran/2023-11-10/")
 }
 
 # Install the GitHub package from mrc-ide
 devtools::install_github("YuLab-SMU/ggtree@c17773c973d6c4036ee3af40a3957fb74d8ee9ff")
-devtools::install_github('mmore500/mlscluster@f3b8fe63eaabb05b4671b0f93e9054ebdbf49070')
+devtools::install_github('mmore500/mlscluster@a8e14c19c1ac6a75c539b898bf1c83216b613b1f')
 
 # Snapshot the current state of the library to record package versions in renv.lock
 renv::snapshot(packages = cran_packages)
