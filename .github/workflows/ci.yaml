@@ -108,10 +108,17 @@ jobs:
           mv stat_results results/ || echo "stat_results not found"
           tar -czvf results.tar.gz results/
 
+      - name: Slugify matrix.target
+        id: slugify
+        run: |
+          RAW_TARGET="${{ matrix.target }}"
+          SLUG=$(echo "$RAW_TARGET" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
+          echo "slug=$SLUG" >> $GITHUB_OUTPUT
+
       - name: Upload results artifact
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ matrix.target }}
+          name: results-${{ steps.slugify.outputs.slug }}
           path: results.tar.gz
 
   deploy-ghcr:
