@@ -38,7 +38,8 @@ indirect_packages <- c(
   "waldo", "whisker", "withr", "xfun", "xml2", "xopen", "xtable", "yaml", "zip"
 )
 
-cran_packages <- c(direct_packages, indirect_packages)
+# cran_packages <- c(direct_packages, indirect_packages)
+cran_packages <- direct_packages
 
 # Install CRAN packages
 install.packages(cran_packages, repos = "https://cloud.r-project.org")
