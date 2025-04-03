@@ -22,10 +22,10 @@ jobs:
         target:
           - R/running.R
           - R/app.R
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_mlsclust TRUE
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_thresholds TRUE
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_stats TRUE
-          - R/app.R --max_date as.Date('2020-10-15')
+          - R/app.R --metadata_json url\('https://osf.io/hgacq/download'\) --phylogeny_json url\('https://osf.io/6j4rg/download'\) --only_thru_mlsclust TRUE
+          - R/app.R --metadata_json url\('https://osf.io/hgacq/download'\) --phylogeny_json url\('https://osf.io/6j4rg/download'\) --only_thru_thresholds TRUE
+          - R/app.R --metadata_json url\('https://osf.io/hgacq/download'\) --phylogeny_json url\('https://osf.io/6j4rg/download'\) --only_thru_stats TRUE
+          - R/app.R --max_date as.date\('2020-10-15'\)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
