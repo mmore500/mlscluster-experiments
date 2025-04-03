@@ -22,6 +22,7 @@ jobs:
         target:
           - R/running.R
           - R/app.R
+          - R/app.R --metadata_json "url('https://osf.io/hgacq/download')" --phylogeny_json "url('https://osf.io/6j4rg/download')"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
