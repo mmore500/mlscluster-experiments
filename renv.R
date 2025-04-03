@@ -128,7 +128,7 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 
 # Install the GitHub package from mrc-ide
 devtools::install_github("YuLab-SMU/ggtree@c17773c973d6c4036ee3af40a3957fb74d8ee9ff")
-devtools::install_github('mrc-ide/mlscluster@e9f7939ab69a61bc310a968252d96177c59921ba')
+devtools::install_github('mmore500/mlscluster@aab4bce621c0abf67f341c3dd98f9993bc2326e2')
 
 # Snapshot the current state of the library to record package versions in renv.lock
 renv::snapshot(packages = cran_packages)
