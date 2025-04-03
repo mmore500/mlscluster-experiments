@@ -121,6 +121,27 @@ option_list = list(
     default = "NA",
     help = "Number of CPU cores [default: detected automatically]",
     metavar = "character"
+  ),
+  make_option(
+    c("--only_thru_mlsclust"),
+    type = "character",
+    default = "FALSE",
+    help = "Exit early after mlsclust [default: detected automatically]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--only_thru_thresholds"),
+    type = "character",
+    default = "FALSE",
+    help = "Exit early after thresholds [default: detected automatically]",
+    metavar = "character"
+  ),
+  make_option(
+    c("--only_thru_stats"),
+    type = "character",
+    default = "FALSE",
+    help = "Exit early after stats [default: detected automatically]",
+    metavar = "character"
   )
 )
 
@@ -141,6 +162,9 @@ defining_mut_threshold <- eval(parse(text = opt$defining_mut_threshold))
 root_on_tip <- eval(parse(text = opt$root_on_tip))
 root_on_tip_sample_time <- eval(parse(text = opt$root_on_tip_sample_time))
 detailed_output <- eval(parse(text = opt$detailed_output))
+only_thru_mlsclust <- eval(parse(text = opt$only_thru_mlsclust))
+only_thru_thresholds <- eval(parse(text = opt$only_thru_thresholds))
+only_thru_stats <- eval(parse(text = opt$only_thru_stats))
 
 if (opt$ncpu == "NA") {
   library(parallel)
@@ -267,6 +291,11 @@ writeLines(
   "rds/homoplasy_freq_df.json"
 )
 
+if (only_thru_mlsclust) {
+  message("Exiting after mlsclust.")
+  quit("no")
+}
+
 ###############################################################################
 message(">>> Thresholds")
 ###############################################################################
@@ -324,6 +353,11 @@ message(paste(
   "mins"
 ))
 
+if (only_thru_thresholds) {
+  message("Exiting after thresholds.")
+  quit("no")
+}
+
 ###############################################################################
 message(">>> Run statistical tests for multiple thresholds")
 ###############################################################################
@@ -375,6 +409,11 @@ plot_tbc_stats("results/period1", "period1")
 stacked_nsites_genomic_region_mult_thresholds(
   "stat_results/period1/genomewide_plot_non-syn/"
 )
+
+if (only_thru_stats) {
+  message("Exiting after stats.")
+  quit("no")
+}
 
 
 ###############################################################################
