@@ -176,14 +176,6 @@ jobs:
         with:
           r-version: '3.6.3'
 
-      # https://github.com/actions/cache/blob/5a3ec84eff668545956fd18022155c47e93e2684/examples.md#r---renv
-      - name: Get R and OS version
-        id: get-version
-        run: |
-          cat("##[set-output name=os-version;]", sessionInfo()$running, "\n", sep = "")
-          cat("##[set-output name=r-version;]", R.Version()$version.string, sep = "")
-        shell: Rscript {0}
-
       - name: Install R dependencies
         env:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
