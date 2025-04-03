@@ -22,10 +22,9 @@ jobs:
         target:
           - R/running.R
           - R/app.R
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_mlsclust TRUE
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_thresholds TRUE
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_stats TRUE
-          - R/app.R --max_date as.Date('2020-10-15')
+          - R/app.R --metadata_json "url('https://osf.io/hgacq/download')" --phylogeny_json "url('https://osf.io/6j4rg/download')" --only_thru_mlsclust "TRUE"
+          - R/app.R --metadata_json "url('https://osf.io/hgacq/download')" --phylogeny_json "url('https://osf.io/6j4rg/download')" --only_thru_thresholds "TRUE"
+          - R/app.R --metadata_json "url('https://osf.io/hgacq/download')" --phylogeny_json "url('https://osf.io/6j4rg/download')" --only_thru_stats "TRUE"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -60,10 +59,10 @@ jobs:
             libxml2-dev \
             zlib1g-dev
 
-      - name: Set up R 4.2.3
+      - name: Set up R 4.4.0
         uses: r-lib/actions/setup-r@v2
         with:
-          r-version: '4.2.3'
+          r-version: '4.4.0'
 
       # https://github.com/actions/cache/blob/5a3ec84eff668545956fd18022155c47e93e2684/examples.md#r---renv
       - name: Set RENV_PATHS_ROOT
@@ -93,7 +92,7 @@ jobs:
         run: |
           Rscript -e 'install.packages("devtools", repos = "https://cloud.r-project.org")'
           Rscript -e 'devtools::install_github("YuLab-SMU/ggtree@c17773c973d6c4036ee3af40a3957fb74d8ee9ff")'
-          Rscript -e 'devtools::install_github("mmore500/mlscluster@85a39581ed84726c29afb8b5ae74b5f524b998df")'
+          Rscript -e 'devtools::install_github("mmore500/mlscluster@f3b8fe63eaabb05b4671b0f93e9054ebdbf49070")'
 
       - uses: r-lib/actions/setup-renv@v2
         env:
@@ -107,90 +106,6 @@ jobs:
 
       - name: Consolidate output to results/
         run: |
-          mkdir -p results
-          mv Rplots.pdf results/ || echo "Rplots.pdf not found"
-          mv stat_results results/ || echo "stat_results not found"
-          tar -czvf results.tar.gz results/
-
-      - name: Slugify matrix.target
-        id: slugify
-        run: |
-          RAW_TARGET="${{ matrix.target }}"
-          SLUG=$(echo "$RAW_TARGET" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
-          echo "slug=$SLUG" >> $GITHUB_OUTPUT
-
-      - name: Upload results artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: results-${{ steps.slugify.outputs.slug }}
-          path: results.tar.gz
-
-  norenv:
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - R/running.R
-          - R/app.R
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_mlsclust TRUE
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_thresholds TRUE
-          - R/app.R --metadata_json url('https://osf.io/hgacq/download') --phylogeny_json url('https://osf.io/6j4rg/download') --only_thru_stats TRUE
-          - R/app.R --max_date as.Date('2020-10-15')
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - uses: oleksiyrudenko/gha-git-credentials@v2.1.1
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          # Install required system libraries
-          sudo apt-get install -y \
-            build-essential \
-            cmake \
-            curl \
-            libblas-dev \
-            libbz2-dev \
-            libcurl4-openssl-dev \
-            libfontconfig1-dev \
-            libfreetype6-dev \
-            libgit2-dev \
-            libharfbuzz-dev \
-            libicu-dev \
-            liblapack-dev \
-            liblzma-dev \
-            libfribidi-dev \
-            libjpeg-dev \
-            libpng-dev \
-            libssl-dev \
-            libtiff5-dev \
-            libxml2-dev \
-            zlib1g-dev
-
-      - name: Set up R 4.2.3
-        uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: '4.2.3'
-
-      - name: Install R dependencies
-        env:
-          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./install_packages.sh
-
-      - name: Run R script
-        run: |
-          timeout 30m Rscript ${{ matrix.target }} \
-            || ( [[ $? -eq 124 ]] && \
-            echo "timing out to prevent job kill due to resource use" )
-
-      - name: Consolidate output to results/
-        run: |
-          mkdir -p results
           mv Rplots.pdf results/ || echo "Rplots.pdf not found"
           mv stat_results results/ || echo "stat_results not found"
           tar -czvf results.tar.gz results/
