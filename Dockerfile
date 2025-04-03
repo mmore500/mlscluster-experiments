@@ -31,14 +31,14 @@ WORKDIR /app
 # Copy your repository files into the container
 COPY . /app
 
+# Install renv and restore the R package library from renv.lock
+RUN Rscript -e "install.packages('renv', repos='https://cloud.r-project.org')" && \
+    Rscript -e "renv::restore(prompt = FALSE)"
+
 # Install R package dependencies
 RUN Rscript -e "install.packages('devtools', repos='https://cloud.r-project.org')" && \
     Rscript -e "devtools::install_github('YuLab-SMU/ggtree@c17773c973d6c4036ee3af40a3957fb74d8ee9ff')" && \
     Rscript -e 'devtools::install_github("mmore500/mlscluster@a8e14c19c1ac6a75c539b898bf1c83216b613b1f")'
-
-# Install renv and restore the R package library from renv.lock
-RUN Rscript -e "install.packages('renv', repos='https://cloud.r-project.org')" && \
-    Rscript -e "renv::restore(prompt = FALSE)"
 
 # Run the R script and consolidate outputs
 CMD ["bash", "-c", "exec Rscript R/app.R \"$@\"", "--"]
